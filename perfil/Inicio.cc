@@ -20,10 +20,11 @@ class Inicio : public cSimpleModule {
     cQueue fila;
     int count = 0;
     cHistogram racaStats;
+    int portaSaida = 0;
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void enviarNovaMensagem();
+    virtual void enviarNovaTurma();
     virtual void finish() override;
 };
 
@@ -32,43 +33,54 @@ Define_Module(Inicio);
 void Inicio::initialize() {
     countRaca = 0;
     indio = 0;
-    enviarNovaMensagem();
+    enviarNovaTurma();
 }
 
 void Inicio::handleMessage(cMessage *msg) {
-    send(msg, "saida");
-    enviarNovaMensagem();
+    if (portaSaida == gateSize("saida") - 1) {
+        portaSaida = 0;
+        enviarNovaTurma();
+    } else {
+        portaSaida++;
+    }
+
+
+    send(msg, "saida", portaSaida);
+
 }
 
-void Inicio::enviarNovaMensagem() {
-    SimTime time = simTime()+exponential(0.5);
-    //std::string text = std::to_string(count++);
-    //cMessage *postMsg = new cMessage(text.c_str());
-    int rnum = std::rand();
-    int nota =  rnum % 10+1;
-    int numero = count++;
+void Inicio::enviarNovaTurma() {
 
-    Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
-    //geração da raca
-    countRaca++;
-    indio++;
-    int raca = 1;
-    aluno->setEvadido(1);
-    if(countRaca == 3){
-        raca = 2;
-        countRaca = 0;
-        aluno->setEvadido(2);
+    for (int i = 0; i < gateSize("saida"); i++) {
+        SimTime time = simTime();
+        int rnum = std::rand();
+        int nota =  rnum % 10+1;
+        int numero = count++;
+
+        Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
+        //geração da raca
+        countRaca++;
+        indio++;
+        int raca = 1;
+        aluno->setEvadido(1);
+        if(countRaca == 3){
+            raca = 2;
+            countRaca = 0;
+            aluno->setEvadido(2);
+        }
+        if(indio == 10){
+            raca = 3;
+            indio = 0;
+            aluno->setEvadido(2);
+        }
+
+        aluno->setRaca(raca);
+        EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
+        racaStats.collect(1.0 * aluno->getEvadido());
+        scheduleAt(time, aluno);
     }
-    if(indio == 10){
-        raca = 3;
-        indio = 0;
-        aluno->setEvadido(2);
-     }
 
-    aluno->setRaca(raca);
-    EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
-    racaStats.collect(1.0 * aluno->getEvadido());
-    scheduleAt(time, aluno);
+
 }
 
 void Inicio::finish(){

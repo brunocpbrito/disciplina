@@ -12,6 +12,8 @@ class QuintoPeriodo : public cSimpleModule {
     cQueue fila;
     bool controle = false;
     int countEvasao;
+    int portaSaida = 0;
+    int portaEntrada = 0;
 
     cHistogram faltasStats;
 
@@ -30,6 +32,19 @@ void QuintoPeriodo::initialize() {
 }
 
 void QuintoPeriodo::handleMessage(cMessage *msg) {
+
+    if (portaSaida == gateSize("saida") - 1) {
+        portaSaida = 0;
+    } else {
+        portaSaida++;
+    }
+
+    if (portaEntrada == gateSize("entrada") - 1) {
+        portaEntrada = 0;
+    } else {
+        portaEntrada++;
+    }
+
     Aluno *aluno1 = dynamic_cast<Aluno *>(msg);
     Aluno *aluno2 = this->calculaEvasao(aluno1);
     faltasStats.collect(1.0 * aluno2->getEvadido());
@@ -38,7 +53,7 @@ void QuintoPeriodo::handleMessage(cMessage *msg) {
     if(aluno2->getEvadido() >= 10){
        countEvasao++;
     }
-    send(aluno2, "saida");
+    send(aluno2, "saida", portaSaida);
 }
 
 Aluno * QuintoPeriodo::calculaEvasao(Aluno *aluno){

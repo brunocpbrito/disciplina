@@ -1,4 +1,4 @@
-package perfil;
+package process;
 
 
 package exemplo6;
@@ -10,7 +10,7 @@ simple Inicio
         int capacidadeFila = default(2);
     gates:
         //input entrada;
-        output saida;
+        output saida[40];
 }
 
 simple PrimeiroPeriodo
@@ -19,8 +19,8 @@ simple PrimeiroPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada;
-        output saida;
+        input entrada[80];
+        output saida[80];
 }
 
 simple TerceiroPeriodo
@@ -29,8 +29,8 @@ simple TerceiroPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada;
-        output saida;
+        input entrada[80];
+        output saida[80];
 }
 simple QuintoPeriodo
 {
@@ -38,8 +38,8 @@ simple QuintoPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada;
-        output saida;
+        input entrada[80];
+        output saida[80];
 }
 
 simple SextoPeriodo
@@ -48,8 +48,8 @@ simple SextoPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada;
-        output saida;
+        input entrada[80];
+        output saida[80];
 }
 
 simple Comum
@@ -78,12 +78,12 @@ simple Fim
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada;
+        input entrada[40];
 }
 
 network Perfil
 {
-    @display("bgb=381,245");
+    @display("bgb=620,346");
     types:
         channel D extends ned.DatarateChannel
         {
@@ -91,38 +91,48 @@ network Perfil
         }
     submodules:
         inicio: Inicio {
-            @display("i=,yellow1;p=345,99");
+            @display("i=,yellow1;p=29,93");
         }
         primeiroPeriodo: PrimeiroPeriodo {
-            @display("i=,purple;p=280,99");
+            @display("i=,purple;p=148,93");
         }
         terceiroPeriodo: TerceiroPeriodo {
-            @display("i=,grey;p=280,30");
+            @display("i=,grey;p=273,93");
         }
         quintoPeriodo: QuintoPeriodo {
-            @display("i=,pink;p=192,30");
+            @display("i=,pink;p=405,93");
         }
         sextoPeriodo: SextoPeriodo {
-            @display("i=,white;p=192,99");
+            @display("i=,white;p=537,93");
         }
-//        especifica1: Especifica {
-//            @display("i=,darkblue;p=29,117");
-//        }
-//        especifica2: Especifica {
-//            @display("i=,darkblue;p=99,117");
-//        }
-//        comum: Comum {
-//            @display("i=,red;p=43,45");
-//        }
+        //        especifica1: Especifica {
+        //            @display("i=,darkblue;p=29,117");
+        //        }
+        //        especifica2: Especifica {
+        //            @display("i=,darkblue;p=99,117");
+        //        }
+        //        comum: Comum {
+        //            @display("i=,red;p=43,45");
+        //        }
         fim: Fim {
-            @display("i=,red;p=192,192");
+            @display("i=,red;p=537,209");
         }
     connections:
-        inicio.saida --> D --> primeiroPeriodo.entrada;
-        primeiroPeriodo.saida --> D --> terceiroPeriodo.entrada;
-        terceiroPeriodo.saida --> D --> quintoPeriodo.entrada;
-        quintoPeriodo.saida --> D --> sextoPeriodo.entrada;
-        sextoPeriodo.saida --> D --> fim.entrada;
+
+        for i=0..39 {
+            inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
+            primeiroPeriodo.saida[i] --> D --> terceiroPeriodo.entrada[i];
+            primeiroPeriodo.saida[i + 40] --> D --> primeiroPeriodo.entrada[i + 40];
+            terceiroPeriodo.saida[i] --> D --> quintoPeriodo.entrada[i];
+            terceiroPeriodo.saida[i + 40] --> D --> terceiroPeriodo.entrada[i + 40];
+            quintoPeriodo.saida[i] --> D --> sextoPeriodo.entrada[i];
+            quintoPeriodo.saida[i + 40] --> D --> quintoPeriodo.entrada[i + 40];
+            sextoPeriodo.saida[i] --> D --> fim.entrada[i];            
+            sextoPeriodo.saida[i + 40] --> D --> sextoPeriodo.entrada[i + 40];
+
+
+        }
+
 //        comum.saida++ --> D --> especifica1.entrada;
 //        comum.saida++ --> D --> especifica2.entrada;
 //        especifica1.saida --> D --> fim.entrada++;
