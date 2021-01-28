@@ -10,27 +10,42 @@ class PrimeiroPeriodo : public cSimpleModule {
   private:
     int capacidadeFila;
     cQueue fila;
-    bool controle = false;
-    int countEvasao;
+
     int portaSaida = 0;
     int portaEntrada = 0;
 
-    cHistogram faltasStats;
+    Aluno *msgFimProcesso;
+    Aluno *processando;
+    double tempoProcessamento = 0.5;
+    bool analisando;
+
+    virtual void processar(Aluno *msg);
+    virtual void colocarFila(Aluno *msg);
 
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
-    virtual void finish() override;
-    virtual Aluno * calculaEvasao(Aluno *aluno);
-    virtual void filaDeAlunos(Aluno *aluno);
-    virtual Aluno * retorno();
+
+  public:
+    virtual ~PrimeiroPeriodo() override;
 };
 
 Define_Module(PrimeiroPeriodo);
 
+/**
+ * O destrutor abaixo remove a mensagem de fim do processo.
+ */
+PrimeiroPeriodo::~PrimeiroPeriodo() {
+    if (processando) {
+        cancelAndDelete(processando);
+        delete processando;
+    }
+    cancelAndDelete(msgFimProcesso);
+}
+
 void PrimeiroPeriodo::initialize() {
     capacidadeFila = par("capacidadeFila");
-    countEvasao = 0;
+    analisando = false;
 }
 
 void PrimeiroPeriodo::handleMessage(cMessage *msg) {
@@ -48,83 +63,62 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     }
 
     Aluno *aluno1 = dynamic_cast<Aluno *>(msg);
-    Aluno *aluno2 = this->calculaEvasao(aluno1);
-    //faltasStats.collect(1.0 * aluno2->getEvadido());
+    EV << "Recebeu \"" << aluno1->getNumero() << " sendo evadido: "  << aluno1->getEvadido()<< "." << endl;
 
-    //colocar numa fila de alunos (capacidade da turma de 40 alunos)
-    //enquanto a fila nao esta cheia, nao envia alunos para o prox periodo.
-    this->filaDeAlunos(aluno2);
+    //Se o aluno foi processado sera enviado.
+    if (aluno1->getEvadido() != 0) {
+            EV << "Fim do processamento de \"" << processando->getNumero() << "\"." << endl;
 
-    //send(aluno2, "saida", portaSaida);
-}
+            //copia os dados do "processando" para poder enviar ao proximo periodo
+            //Cabe aqui um trecho de codigo que vai definir se o aluno ira para o prox periodo,
+            //ou se ira evadir de fato ou voltar ao mesmo periodo.
+            //Ate entao todos os alunos processados estao indo para o proximo periodo.
+            Aluno *alunoAprovado = new Aluno(processando->getNumero(), processando->getNome(), 10);
+            alunoAprovado->setFaltas(0);
+            alunoAprovado->setRaca(2);
+            send(alunoAprovado, "saida", portaSaida);
 
-
-Aluno * PrimeiroPeriodo::calculaEvasao(Aluno *aluno){
-    //relativo a faltas
-
-        int rnum = std::rand();
-        int porcentagem =  rnum % 100+1;
-        if(porcentagem <= 20){
-            aluno->setFaltas(10);
-            //adiciona valor a evasao para numero de falta grande
-            aluno->setEvadido(aluno->getEvadido()+2);
-        }else{
-            aluno->setFaltas(0);
-            aluno->setEvadido(aluno->getEvadido()+1);
+            delete processando;
+            if (fila.isEmpty()) {
+                //caso a fila(turma) esteja vazia
+                processando = nullptr;
+            } else {
+                //senao ja pega o proximo da fila(turma) para processar.
+                processando = check_and_cast<Aluno *>(fila.pop());
+                processar(processando);
         }
-     //relativo a notas
-        int rnumNota = std::rand();
-        int porcentagemNota =  rnumNota % 100+1;
-        if(porcentagemNota <= 20){
-            aluno->setNota(5);
-            //adiciona valor a evasao para nota baixa
-            aluno->setEvadido(aluno->getEvadido()+2);
-        }else{
-            aluno->setNota(10);
-            aluno->setEvadido(aluno->getEvadido()+1);
+        //senao se aluno que chegou nao foi processado, mas a variavel processando está nula
+        //significa que o aluno esta apto para processsar.
+        } else if (!processando) {
+            processando = aluno1;
+            processar(processando);
+          //senao se o aluno que chegou e a variavel processando nao esta nula, o aluno ira para a fila,
+          //pois ainda esta no processando
+        } else {
+            colocarFila(aluno1);
         }
-
-        return aluno;
 }
 
-void PrimeiroPeriodo::finish(){
-    EV << "\n Primeiro periodo, indice de evasao" << endl;
-    EV << "Muitas faltas (+2) com aumento de 10 faltas, poucas faltas (+1) sem aumento" << endl;
-    EV << "Evasao, min:    " << faltasStats.getMin() << endl;
-    EV << "Evasao, max:    " << faltasStats.getMax() << endl;
-    EV << "Evasao, mean:   " << faltasStats.getMean() << endl;
-    EV << "Evasao, stddev: " << faltasStats.getStddev() << endl;
-    faltasStats.recordAs("Evasao");
+//O processar se dá apenas em converter o aluno 0 ou 1 no evadido e agendar seu envio ao handle message
+// num tempo maior.
+void PrimeiroPeriodo::processar(Aluno *msg) {
+    simtime_t tempoServico = exponential(tempoProcessamento);
+    EV << "Processando \"" << msg->getNumero() << "\" por " << tempoServico << "s." << endl;
+    //O processar significa colocar o aluno como evadido, e assim marca-lo como ja processado
+    msg->setEvadido(1);
+    //agenda o envio do aluno ao handleMessage com tempo de demora de 1 segundo
+    scheduleAt(simTime()+1, msg);
+
 }
 
-//metodo para armazenar a capacidade de alunos numa turma.
-void PrimeiroPeriodo::filaDeAlunos(Aluno *aluno){
-
-    if (fila.isEmpty() || fila.getLength() < capacidadeFila) {
-
-         EV << "Aluno de numero \""<< aluno->getNome() << "\" colocado na turma .\n";
-         fila.insert(aluno);
-         EV << fila.getLength() << " alunos na turma.\n";
-
-         //supostamente demanda um tempo aqui para processar.
-         //trecho de codigo para fazer algo
-         simtime_t tempoServico = exponential(5.0);
-         EV << "Processando em " << tempoServico << "s." << endl;
-
-         //scheduleAt(simTime()+tempoServico, this->retorno());
-         sendDelayed(this->retorno(), simTime()+tempoServico,"saida", portaSaida);
-     } else {
-         EV << "capacidade da turma excedida .\n";
-         //colaca-se numa fila de espera.
-         //a fazer
+void PrimeiroPeriodo::colocarFila(Aluno *msg) {
+    if (capacidadeFila > 0 && fila.getLength() == capacidadeFila) {
+        EV << "Descartando \""<< msg->getNumero() << "\". Motivo: fila cheia (#fila: " << capacidadeFila << "." << endl;
+        delete msg;
+    } else {
+        //msg->setEvadido(1);
+        fila.insert(msg);
+        EV << "Colocando \"" << msg->getNumero() << "\" na fila (#fila: " << fila.getLength() << ")." << endl;
     }
 }
-
-Aluno * PrimeiroPeriodo::retorno(){
-    Aluno *retorno = new Aluno;
-    retorno = dynamic_cast<Aluno *>(fila.pop());
-    EV << "Enviando " << retorno->getNome() << " para o proximo periodo" << endl;
-    return retorno;
-}
-
 

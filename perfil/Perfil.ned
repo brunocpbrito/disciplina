@@ -7,7 +7,7 @@ simple Inicio
 {
     parameters:
         @display("i=old/folder;i2=status/red, purple");
-        int capacidadeFila = default(2);
+        int capacidadeFila = default(40);
     gates:
         //input entrada;
         output saida[40];
@@ -17,7 +17,7 @@ simple PrimeiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(2);
+        int capacidadeFila = default(39);
     gates:
         input entrada[80];
         output saida[80];
@@ -123,10 +123,13 @@ network Perfil
             inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
             primeiroPeriodo.saida[i] --> D --> terceiroPeriodo.entrada[i];
             primeiroPeriodo.saida[i + 40] --> D --> primeiroPeriodo.entrada[i + 40];
+            
             terceiroPeriodo.saida[i] --> D --> quintoPeriodo.entrada[i];
             terceiroPeriodo.saida[i + 40] --> D --> terceiroPeriodo.entrada[i + 40];
+            
             quintoPeriodo.saida[i] --> D --> sextoPeriodo.entrada[i];
             quintoPeriodo.saida[i + 40] --> D --> quintoPeriodo.entrada[i + 40];
+            
             sextoPeriodo.saida[i] --> D --> fim.entrada[i];            
             sextoPeriodo.saida[i + 40] --> D --> sextoPeriodo.entrada[i + 40];
 

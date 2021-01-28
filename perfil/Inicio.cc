@@ -44,40 +44,31 @@ void Inicio::handleMessage(cMessage *msg) {
         portaSaida++;
     }
 
-
     send(msg, "saida", portaSaida);
 
 }
 
 void Inicio::enviarNovaTurma() {
 
+
+
     for (int i = 0; i < gateSize("saida"); i++) {
-        SimTime time = simTime();
+
         int rnum = std::rand();
         int nota =  rnum % 10+1;
         int numero = count++;
-
+        SimTime time = simTime();
         Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
         //geração da raca
         countRaca++;
         indio++;
         int raca = 1;
-        aluno->setEvadido(1);
-        if(countRaca == 3){
-            raca = 2;
-            countRaca = 0;
-            aluno->setEvadido(2);
-        }
-        if(indio == 10){
-            raca = 3;
-            indio = 0;
-            aluno->setEvadido(2);
-        }
-
-        aluno->setRaca(raca);
+        aluno->setEvadido(0);
+        aluno->setFaltas(0);
+        aluno->setRaca(2);
         EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
         racaStats.collect(1.0 * aluno->getEvadido());
-        scheduleAt(time, aluno);
+        scheduleAt(simTime()+1.0, aluno);
     }
 
 

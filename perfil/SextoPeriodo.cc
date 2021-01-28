@@ -15,6 +15,7 @@ class SextoPeriodo : public cSimpleModule {
     int portaSaida = 0;
     int portaEntrada = 0;
 
+    Aluno *processando;
     cHistogram faltasStats;
 
   protected:
