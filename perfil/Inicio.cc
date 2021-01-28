@@ -68,7 +68,9 @@ void Inicio::enviarNovaTurma() {
         aluno->setRaca(2);
         EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
         racaStats.collect(1.0 * aluno->getEvadido());
-        scheduleAt(simTime()+1.0, aluno);
+
+        //agenda o envio do aluno num tempo de 1 segundo.
+        scheduleAt(simTime()+2.0, aluno);
     }
 
 

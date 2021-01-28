@@ -63,7 +63,7 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     }
 
     Aluno *aluno1 = dynamic_cast<Aluno *>(msg);
-    EV << "Recebeu \"" << aluno1->getNumero() << " sendo evadido: "  << aluno1->getEvadido()<< "." << endl;
+    EV << "Recebeu aluno \"" << aluno1->getNumero() << " sendo processado: "  << aluno1->getEvadido()<< "." << endl;
 
     //Se o aluno foi processado sera enviado.
     if (aluno1->getEvadido() != 0) {
@@ -103,11 +103,11 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
 // num tempo maior.
 void PrimeiroPeriodo::processar(Aluno *msg) {
     simtime_t tempoServico = exponential(tempoProcessamento);
-    EV << "Processando \"" << msg->getNumero() << "\" por " << tempoServico << "s." << endl;
+    EV << "Processando aluno \"" << msg->getNumero() << "\" por " << tempoServico << "s." << endl;
     //O processar significa colocar o aluno como evadido, e assim marca-lo como ja processado
     msg->setEvadido(1);
     //agenda o envio do aluno ao handleMessage com tempo de demora de 1 segundo
-    scheduleAt(simTime()+1, msg);
+    scheduleAt(simTime()+1.0, msg);
 
 }
 
