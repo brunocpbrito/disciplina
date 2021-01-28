@@ -116,7 +116,6 @@ void PrimeiroPeriodo::colocarFila(Aluno *msg) {
         EV << "Descartando \""<< msg->getNumero() << "\". Motivo: fila cheia (#fila: " << capacidadeFila << "." << endl;
         delete msg;
     } else {
-        //msg->setEvadido(1);
         fila.insert(msg);
         EV << "Colocando \"" << msg->getNumero() << "\" na fila (#fila: " << fila.getLength() << ")." << endl;
     }

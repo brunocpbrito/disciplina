@@ -69,8 +69,9 @@ void Inicio::enviarNovaTurma() {
         EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
         racaStats.collect(1.0 * aluno->getEvadido());
 
-        //agenda o envio do aluno num tempo de 1 segundo.
-        scheduleAt(simTime()+2.0, aluno);
+        //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
+        //primeiro periodo de modo a nao gerar filas.
+        scheduleAt(simTime()+1.0, aluno);
     }
 
 
