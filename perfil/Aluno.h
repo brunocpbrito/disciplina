@@ -5,11 +5,13 @@ class Aluno : public omnetpp::cMessage{
 private:
     int numero;
     std::string nome;
-    int nota;
+    double nota;
     int raca;//1 branco 2 preto 3 indio
     int evadido; //0 nao evadido 1 evadido
     int faltas;
-    int qtdMatriculas; // 0 qtde alta, 1 qtde baixa;
+    int qtdMatriculas;
+    bool processando;
+    bool estaNaFila;
 public:
     Aluno();
     Aluno(int numero, std::string nome, double nota);
@@ -17,7 +19,9 @@ public:
 
     virtual void setNome(std::string nome);
     virtual void setNumero(int numero);
-    virtual void setNota(int nota);
+    virtual void setNota(double nota);
+    virtual void setProcessando(bool processando);
+    virtual void setEstaNaFila(bool estaNaFila);
 
     virtual void setRaca(int raca);
     virtual void setEvadido(int evadido);
@@ -25,7 +29,9 @@ public:
 
     virtual std::string getNome();
     virtual int getNumero();
-    virtual int getNota();
+    virtual double getNota();
+    virtual bool getProcessando();
+    virtual bool getEstaNaFila();
 
     virtual int getRaca();
     virtual int getEvadido();

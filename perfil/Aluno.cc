@@ -13,6 +13,8 @@ Aluno::Aluno(int numero, std::string nome, double nota) {
     this->setNumero(numero);
     this->setNome(nome);
     this->setNota(nota);
+    this->setProcessando(false);
+    this->setEstaNaFila(false);
 }
 
 void Aluno::setNumero(int numero){
@@ -23,15 +25,23 @@ void Aluno::setNome(std::string nome){
     this->nome = nome;
 }
 
-void Aluno::setNota(int nota){
+void Aluno::setNota(double nota){
     this->nota = nota;
+}
+
+void Aluno::setProcessando(bool processando){
+    this->processando = processando;
+}
+
+void Aluno::setEstaNaFila(bool estaNaFila){
+    this->estaNaFila = estaNaFila;
 }
 
 std::string Aluno::getNome(){
     return this->nome;
 }
 
-int Aluno::getNota(){
+double Aluno::getNota(){
     return this->nota;
 }
 
@@ -69,4 +79,12 @@ void Aluno::setQtdMatriculas(int qtde){
 
 int Aluno::getQtdMatriculas(){
     return this->qtdMatriculas;
+}
+
+bool Aluno::getProcessando(){
+    return this->processando;
+}
+
+bool Aluno::getEstaNaFila(){
+    return this->estaNaFila;
 }

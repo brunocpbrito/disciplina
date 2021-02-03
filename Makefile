@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for projeto1
+# OMNeT++/OMNEST Makefile for disciplina
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -O out -I.
 #
 
 # Name of target to be created (-o option)
-TARGET = projeto1$(D)$(EXE_SUFFIX)
+TARGET = disciplina$(D)$(EXE_SUFFIX)
 TARGET_DIR = .
 
 # User interface (uncomment one) (-u option)
