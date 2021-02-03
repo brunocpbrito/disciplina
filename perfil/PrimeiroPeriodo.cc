@@ -67,12 +67,12 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
 
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
         if (alunoParaEnvio->getNota() >= 70.0) {
-            EV << "Recebeu \"" << alunoParaEnvio->getNumero() << "\", status processamento: " << aluno->getProcessando() << " sendo enviado "<< endl;
+            EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\", status processamento: " << aluno->getProcessando() << " sendo enviado "<< endl;
             send(alunoParaEnvio, "saida", portaSaida);
         }
         // sen�o, entra na porta saida que leva para o periodo atual
         else {
-            EV << "Recebeu \"" << alunoParaEnvio->getNumero() << "\", status processamento: " << aluno->getProcessando() << " sendo enviado "<< endl;
+            EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\", status processamento: " << aluno->getProcessando() << " sendo enviado "<< endl;
             //nesse trecho ele vai para porta 85 e dá erro, depois verificar, comentei por isso.
             //send(alunoParaEnvio, "saida", portaSaida + 40);
         }
