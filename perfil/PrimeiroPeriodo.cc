@@ -43,13 +43,13 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno *>(msg);
     EV << "Recebeu \"" << aluno->getNumero() << "\", status processamento: " << aluno->getProcessando() << ", status fila: "<< aluno->getEstaNaFila() << endl;
 
-    if (portaSaida == gateSize("saida") - 1) {
+    if (portaSaida == gateSize("saida") / 2 - 1) {
         portaSaida = 0;
     } else {
         portaSaida++;
     }
 
-    if (portaEntrada == gateSize("entrada") - 1) {
+    if (portaEntrada == gateSize("entrada") / 2 - 1) {
         portaEntrada = 0;
     } else {
         portaEntrada++;
