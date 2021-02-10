@@ -14,7 +14,6 @@ Aluno::Aluno(int numero, std::string nome, double nota) {
     this->setNome(nome);
     this->setNota(nota);
     this->setProcessando(false);
-    this->setEstaNaFila(false);
 }
 
 void Aluno::setNumero(int numero){
@@ -33,8 +32,8 @@ void Aluno::setProcessando(bool processando){
     this->processando = processando;
 }
 
-void Aluno::setEstaNaFila(bool estaNaFila){
-    this->estaNaFila = estaNaFila;
+void Aluno::setIngressante(bool ingressante){
+    this->ingressante = ingressante;
 }
 
 std::string Aluno::getNome(){
@@ -85,6 +84,6 @@ bool Aluno::getProcessando(){
     return this->processando;
 }
 
-bool Aluno::getEstaNaFila(){
-    return this->estaNaFila;
+bool Aluno::getIngressante(){
+    return this->ingressante;
 }

@@ -11,7 +11,7 @@ private:
     int faltas;
     int qtdMatriculas;
     bool processando;
-    bool estaNaFila;
+    bool ingressante;
 public:
     Aluno();
     Aluno(int numero, std::string nome, double nota);
@@ -21,7 +21,7 @@ public:
     virtual void setNumero(int numero);
     virtual void setNota(double nota);
     virtual void setProcessando(bool processando);
-    virtual void setEstaNaFila(bool estaNaFila);
+    virtual void setIngressante(bool ingressante);
 
     virtual void setRaca(int raca);
     virtual void setEvadido(int evadido);
@@ -31,7 +31,7 @@ public:
     virtual int getNumero();
     virtual double getNota();
     virtual bool getProcessando();
-    virtual bool getEstaNaFila();
+    virtual bool getIngressante();
 
     virtual int getRaca();
     virtual int getEvadido();

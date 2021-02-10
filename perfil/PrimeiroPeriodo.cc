@@ -20,6 +20,7 @@ class PrimeiroPeriodo : public cSimpleModule {
 
     double tempoProcessamento = 1;
     bool controle;
+    bool encheuTurma;
     cHistogram turmaEspera;
     virtual void processar(Aluno *msg);
     virtual void colocarFila(Aluno *msg);
@@ -30,7 +31,7 @@ class PrimeiroPeriodo : public cSimpleModule {
 
   public:
     virtual void finish() override;
-    virtual Aluno * alunoPrioridade();
+    virtual Aluno * alunoPrioridade(Aluno * aluno);
     double notaAleatoria(){
        int rnum = std::rand();
        return rnum % 10;
@@ -40,15 +41,20 @@ class PrimeiroPeriodo : public cSimpleModule {
 Define_Module(PrimeiroPeriodo);
 
 void PrimeiroPeriodo::initialize() {
-    capacidadeFila = par("capacidadeFila");
+    capacidadeFila = 10;
     capacidade = capacidadeFila;
+    encheuTurma = false;
 }
 
 
 void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno *>(msg);
+   if(aluno->getNome() == "turma"){
+       EV << " Criando turmas de 10 alunos "  << endl;
+       encheuTurma = false;
+        //delete aluno;
+    }else{
     EV << "Recebeu \"" << aluno->getNumero() << "\", status processamento: " << aluno->getProcessando()  << endl;
-
 
     controle = true;
     // criei a variavel processando para n�o trabalhar com evadido
@@ -62,17 +68,17 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
         alunoParaEnvio->setRaca(2);
 
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
-        if (alunoParaEnvio->getNota() >= 5) {
+        if (alunoParaEnvio->getNota() >= 7) {
             EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\" sendo enviado para outro periodo "<< endl;
             send(alunoParaEnvio, "saida", 0);
             controle = false;
         }
         // sen�o, entra na porta saida que leva para o periodo atual
         else {
-            EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\" para o mesmo periodo "<< endl;
-            //nesse trecho ele vai para porta 85 e dá erro, depois verificar, comentei por isso.
+            EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\" para o mesmo periodo na fila de espera " << filaEspera.getLength() << " "<< endl;
+            //o aluno entra na fila de espera para a pro turma
             alunoParaEnvio->setQtdMatriculas(alunoParaEnvio->getQtdMatriculas()+1);
-            send(alunoParaEnvio, "saida", 14);
+            filaEspera.insert(alunoParaEnvio);
             controle = false;
         }
         turmaEspera.collect(filaEspera.getLength());
@@ -80,11 +86,11 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
         if (turma.isEmpty()) {
              processando = nullptr;
         } else {
-             processando = alunoPrioridade();
+             processando = alunoPrioridade(aluno);
              processar(processando);
             }
         } else if (!processando) {
-               processando = aluno;
+               processando = alunoPrioridade(aluno);
                if(controle){
                    processar(processando);
                }
@@ -93,8 +99,9 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
                if(controle)
                    colocarFila(aluno);
            }
-}
 
+    }
+}
 
 
 void PrimeiroPeriodo::processar(Aluno *aluno) {
@@ -102,37 +109,41 @@ void PrimeiroPeriodo::processar(Aluno *aluno) {
     EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
     // aluno est� processsanod, seta processando como true e agenda o envio
     aluno->setProcessando(true);
-    scheduleAt(simTime()+1.8, aluno);
+    scheduleAt(simTime()+1.2, aluno);
 }
 
 
 void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
-
-    if (turma.getLength() == capacidadeFila) {
-        EV << "Colocando \""<< aluno->getNumero() << "\" Na fila de espera. Motivo: turma cheia (#fila: " << capacidadeFila << "." << endl;
+    //a turma so eh enchida uma vez por leva de alunos. Uma vez enchida, so sera novamente na prox leva
+    //turma menor que a capacidade e nao encheu
+    if (turma.getLength() < capacidadeFila && encheuTurma == false) {
+        EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: " << turma.getLength() << ")." << endl;
+        turma.insert(aluno);
+    }else
+    //turma igual a capacidade
+    if(encheuTurma == false){
+         EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() << "." << endl;
+         //Encheu a turma
+         encheuTurma = true;
+         filaEspera.insert(aluno);
+    }else if(encheuTurma){
+        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() << "." << endl;
         filaEspera.insert(aluno);
-
-    } else {
-        if(filaEspera.getLength() == 0){
-            // aluno adicionado na fila, seta estaNaFila para true
-            aluno->setEstaNaFila(true);
-            turma.insert(aluno);
-            EV << "Colocando \"" << aluno->getNumero() << "\" na turma (#fila: " << turma.getLength() << ")." << endl;
-        }else{
-            EV << "Colocando na fila de espera. Motivo: turma cheia " << endl;
-            filaEspera.insert(aluno);
-        }
-
     }
+//    if(turma.getLength() == 0 && encheuTurma == true){
+//       encheuTurma = false;
+//    }
+
 }
 
-Aluno * PrimeiroPeriodo::alunoPrioridade(){
+Aluno * PrimeiroPeriodo::alunoPrioridade(Aluno *aluno){
     Aluno * aluno1 = new Aluno();
     Aluno * aluno2 = new Aluno();
     Aluno * retorno = new Aluno();
 
     //se houver fila de espera e turma
     //entao compara qual sera o prox a processar baseado na quantidade de matriculas
+    //precisa ser ajustado para pegar a devida preferencia
     if(filaEspera.getLength() > 0 && turma.getLength() > 0){
 
         aluno1 = check_and_cast<Aluno *>(turma.front());
@@ -144,15 +155,11 @@ Aluno * PrimeiroPeriodo::alunoPrioridade(){
             EV << "troca de alunos pela prioridade da fila de espera." << endl;
             retorno = check_and_cast<Aluno *>(filaEspera.pop());
         }
-        } else{
+        } else if(turma.getLength() == 0){
+            retorno = aluno;
+        }else{
             retorno = check_and_cast<Aluno *>(turma.pop());
         }
-
-    //Se a turma acabar pega da lista de espera.
-    if(filaEspera.getLength() > 0 && turma.getLength() == 0){
-        EV << "Pegando alunos da fila de espera." << endl;
-        retorno = check_and_cast<Aluno *>(filaEspera.pop());
-    }
 
     return retorno;
 }
