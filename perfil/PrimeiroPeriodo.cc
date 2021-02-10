@@ -152,5 +152,6 @@ Aluno * PrimeiroPeriodo::alunoPrioridade(){
         retorno = check_and_cast<Aluno *>(filaEspera.pop());
     }
 
+
     return retorno;
 }
