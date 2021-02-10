@@ -66,7 +66,7 @@ void Inicio::enviarNovaTurma() {
         aluno->setEvadido(0);
         aluno->setFaltas(0);
         aluno->setRaca(2);
-        EV << "Enviando \"" << aluno->getNome() << "\"" << endl;
+        EV << "Enviando aluno \"" << aluno->getNumero() << "\"" << endl;
         racaStats.collect(1.0 * aluno->getEvadido());
 
         //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo

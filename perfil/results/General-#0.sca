@@ -1,14 +1,14 @@
 version 2
-run General-0-20210203-19:41:54-17412
+run General-0-20210209-22:34:38-18456
 attr configname General
-attr datetime 20210203-19:41:54
+attr datetime 20210209-22:34:38
 attr experiment General
 attr inifile Perfil.ini
 attr iterationvars ""
 attr iterationvarsf ""
 attr measurement ""
 attr network Perfil
-attr processid 17412
+attr processid 18456
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -16,7 +16,7 @@ attr runnumber 0
 attr seedset 0
 
 statistic Perfil.inicio Evasao
-field count 160
+field count 50
 field mean 0
 field stddev 0
 field min 0
@@ -49,7 +49,7 @@ bin	-0.08	0
 bin	-0.06	0
 bin	-0.04	0
 bin	-0.02	0
-bin	0	160
+bin	0	50
 bin	0.02	0
 bin	0.04	0
 bin	0.06	0
@@ -75,39 +75,6 @@ bin	0.44	0
 bin	0.46	0
 bin	0.48	0
 bin	0.5	0
-statistic Perfil.terceiroPeriodo Evasao
-field count 0
-field mean nan
-field stddev nan
-field min nan
-field max nan
-field sum 0
-field sqrsum 0
-bin	-inf	0
-bin	0	0
-bin	1	0
-statistic Perfil.quintoPeriodo Evasao
-field count 0
-field mean nan
-field stddev nan
-field min nan
-field max nan
-field sum 0
-field sqrsum 0
-bin	-inf	0
-bin	0	0
-bin	1	0
-statistic Perfil.sextoPeriodo Evasao
-field count 0
-field mean nan
-field stddev nan
-field min nan
-field max nan
-field sum 0
-field sqrsum 0
-bin	-inf	0
-bin	0	0
-bin	1	0
 statistic Perfil.fim fila
 field count 0
 field mean nan
