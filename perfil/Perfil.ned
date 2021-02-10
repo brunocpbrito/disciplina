@@ -10,17 +10,17 @@ simple Inicio
         int capacidadeFila = default(10);
     gates:
         //input entrada;
-        output saida[10];
+        output saida[40];
 }
 
 simple PrimeiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(10);
+        int capacidadeFila = default(20);
     gates:
-        input entrada[20];
-        output saida[20];
+        input entrada[80];
+        output saida[80];
 }
 
 simple TerceiroPeriodo
@@ -78,7 +78,7 @@ simple Fim
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada[10];
+        input entrada[40];
 }
 
 network Perfil
@@ -119,10 +119,10 @@ network Perfil
         }
     connections:
 
-        for i=0..9 {
+        for i=0..39 {
             inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
             primeiroPeriodo.saida[i] --> D --> fim.entrada[i];
-            primeiroPeriodo.saida[i + 10] --> D --> primeiroPeriodo.entrada[i + 10];
+            primeiroPeriodo.saida[i + 40] --> D --> primeiroPeriodo.entrada[i + 40];
             
             //terceiroPeriodo.saida[i] --> D --> quintoPeriodo.entrada[i];
             //terceiroPeriodo.saida[i + 10] --> D --> terceiroPeriodo.entrada[i + 10];

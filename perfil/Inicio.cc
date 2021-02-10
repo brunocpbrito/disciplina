@@ -26,6 +26,7 @@ class Inicio : public cSimpleModule {
     virtual void handleMessage(cMessage *msg) override;
     virtual void enviarNovaTurma();
     virtual void finish() override;
+    virtual double tempo();
 };
 
 Define_Module(Inicio);
@@ -71,10 +72,20 @@ void Inicio::enviarNovaTurma() {
 
         //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
         //primeiro periodo de modo a nao gerar filas.
-        scheduleAt(simTime()+1.0, aluno);
+        scheduleAt(simTime()+tempo(), aluno);
     }
 
 
+}
+
+double Inicio::tempo(){
+    if(count > 20){
+        //tempo contado como dias, a cada 20 alunos, o tempo aumenta para 60 dias para diminuir a fila de espera
+        return 30.0;
+    }else{
+        //tempo relativo dias
+        return 30.0;
+    }
 }
 
 void Inicio::finish(){

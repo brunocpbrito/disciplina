@@ -20,6 +20,7 @@ class PrimeiroPeriodo : public cSimpleModule {
 
     double tempoProcessamento = 1;
     bool controle;
+    cHistogram turmaEspera;
     virtual void processar(Aluno *msg);
     virtual void colocarFila(Aluno *msg);
 
@@ -28,6 +29,7 @@ class PrimeiroPeriodo : public cSimpleModule {
     virtual void handleMessage(cMessage *msg) override;
 
   public:
+    virtual void finish() override;
     virtual Aluno * alunoPrioridade();
     double notaAleatoria(){
        int rnum = std::rand();
@@ -60,7 +62,7 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
         alunoParaEnvio->setRaca(2);
 
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
-        if (alunoParaEnvio->getNota() >= 7) {
+        if (alunoParaEnvio->getNota() >= 5) {
             EV << "Enviando \"" << alunoParaEnvio->getNumero() << "\" sendo enviado para outro periodo "<< endl;
             send(alunoParaEnvio, "saida", 0);
             controle = false;
@@ -73,7 +75,7 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
             send(alunoParaEnvio, "saida", 14);
             controle = false;
         }
-
+        turmaEspera.collect(filaEspera.getLength());
         delete processando;
         if (turma.isEmpty()) {
              processando = nullptr;
@@ -100,7 +102,7 @@ void PrimeiroPeriodo::processar(Aluno *aluno) {
     EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
     // aluno est� processsanod, seta processando como true e agenda o envio
     aluno->setProcessando(true);
-    scheduleAt(simTime()+1.1, aluno);
+    scheduleAt(simTime()+1.8, aluno);
 }
 
 
@@ -130,7 +132,7 @@ Aluno * PrimeiroPeriodo::alunoPrioridade(){
     Aluno * retorno = new Aluno();
 
     //se houver fila de espera e turma
-    //entao compara qual sera o prox a processar baseado na quantidade de reprovacaoes
+    //entao compara qual sera o prox a processar baseado na quantidade de matriculas
     if(filaEspera.getLength() > 0 && turma.getLength() > 0){
 
         aluno1 = check_and_cast<Aluno *>(turma.front());
@@ -152,6 +154,16 @@ Aluno * PrimeiroPeriodo::alunoPrioridade(){
         retorno = check_and_cast<Aluno *>(filaEspera.pop());
     }
 
-
     return retorno;
+}
+
+void PrimeiroPeriodo::finish(){
+    EV << "\n Fila de espera" << endl;
+    EV << "Valores para a fila de espera" << endl;
+    EV << " Fila de espera, min:    " << turmaEspera.getMin() << endl;
+    EV << " Fila de espera, max:    " << turmaEspera.getMax() << endl;
+    EV << " Fila de espera, mean:   " << turmaEspera.getMean() << endl;
+    EV << " Fila de espera, stddev: " << turmaEspera.getStddev() << endl;
+    EV << " Total da fila de espera no momentov: " << filaEspera.getLength() << endl;
+    turmaEspera.recordAs("Espera");
 }
