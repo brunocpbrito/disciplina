@@ -39,17 +39,7 @@ void Fim::handleMessage(cMessage *msg) {
 }
 
 void Fim::finish(){
-       EV << "\n Raça, media de racas:   " << filaStats.getMean() << endl;
-       EV << "Raca, desvio padrao: " << filaStats.getStddev() << endl;
-       EV << "Raca valor maximo: " << filaStats.getMax() << endl;
-       EV << "Raca valor minimo: " << filaStats.getMin() << endl;
-       filaStats.recordAs("fila");
 
-       EV << "\n Quantidade de aluno evadidos" << endl;
-       EV << "Total:    " << countEvasao << "\n" <<endl;
-       EV << "Quantidade total" << endl;
-       EV << "Total:    " << countTotal << "\n" <<endl;
-       statsEvasao.recordAs("fila");
 
 }
 

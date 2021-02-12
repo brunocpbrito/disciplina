@@ -27,7 +27,7 @@ class SegundoPeriodo : public cSimpleModule {
     double tempoProcessamento = 1;
     bool encheuTurma;
     cHistogram turmaEspera;
-    virtual void processar(Aluno *msg);
+    virtual void processar();
     virtual void colocarFila(Aluno *msg);
 
   protected:
@@ -58,9 +58,19 @@ void SegundoPeriodo::initialize() {
 void SegundoPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
-        EV << " Criando turmas de 10 alunos no Segundo Periodo " << endl;
+        EV << "\n Criando turmas de 10 alunos no Segundo Periodo \n" << endl;
         encheuTurma = false;
 
+        if(turma.getLength() < capacidadeFila && !filaEspera.isEmpty()){
+            EV << "\n Turma com vagas, pegando alunos da fila de espera do Segundo Periodo \n" << endl;
+            while(turma.getLength() < capacidade){
+                while(!filaEspera.isEmpty()){
+                    Aluno *alunoFila = check_and_cast<Aluno*>(filaEspera.pop());
+                    turma.insert(alunoFila);
+                }
+            }
+        }
+        processar();
         //delete aluno;
     } else {
         EV << "Recebeu \"" << aluno->getNumero() << "\", status processamento: " << aluno->getProcessando() << "\" do Segundo Periodo " << endl;
@@ -69,7 +79,7 @@ void SegundoPeriodo::handleMessage(cMessage *msg) {
         if (aluno->getProcessando()) {
 
             //criado uma nova variavel para poder enviar.
-            Aluno *alunoParaEnvio = new Aluno(processando->getNumero(), processando->getNome(), processando->getNota());
+            Aluno *alunoParaEnvio = new Aluno(aluno->getNumero(), aluno->getNome(), aluno->getNota());
 
             //seta a nota aleatoria
             alunoParaEnvio->setNota(notaAleatoria());
@@ -77,20 +87,6 @@ void SegundoPeriodo::handleMessage(cMessage *msg) {
 
             destinoAluno(alunoParaEnvio);
 
-            delete processando;
-            if (turma.isEmpty()) {
-                processando = nullptr;
-                Aluno * turma = new Aluno();
-                turma->setNome("turma");
-
-                send(turma, "saida", 0);
-            } else {
-                processando = alunoPrioridade(aluno);
-                processar(processando);
-            }
-        } else if (!processando) {
-            processando = alunoPrioridade(aluno);
-            processar(processando);
         } else {
             //senao se estiver em analise, coloca o aluno que chegou na filaelse {
             colocarFila(aluno);
@@ -99,11 +95,24 @@ void SegundoPeriodo::handleMessage(cMessage *msg) {
     }
 }
 
-void SegundoPeriodo::processar(Aluno *aluno) {
-    simtime_t tempoServico = exponential(tempoProcessamento);
-    EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
-    aluno->setProcessando(true);
-    scheduleAt(simTime()+.01, aluno);
+void SegundoPeriodo::processar() {
+    while (!turma.isEmpty()) {
+        Aluno *aluno = check_and_cast<Aluno*>(turma.pop());
+        simtime_t tempoServico = exponential(tempoProcessamento);
+        EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
+        aluno->setProcessando(true);
+        destinoAluno(aluno);
+    }
+    if (turma.isEmpty()) {
+
+        Aluno *turma = new Aluno();
+        turma->setNome("turma");
+        EV << "\n !!Enviando alunos para o Terceiro Periodo.!! \n " << endl;
+        //envia mensagem para criar nova turma no prox periodo
+        send(turma, "saida", 0);
+        encheuTurma = false;
+    }
+
 }
 
 
@@ -113,6 +122,10 @@ void SegundoPeriodo::colocarFila(Aluno *aluno) {
     if (turma.getLength() < capacidadeFila && encheuTurma == false) {
         EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: "  << turma.getLength() + 1 << ")." << endl;
         turma.insert(aluno);
+        if (turma.getLength() == capacidadeFila) {
+            encheuTurma = true;
+            processar();
+        }
     } else
     //turma igual a capacidade
     if (encheuTurma == false) {
@@ -124,7 +137,7 @@ void SegundoPeriodo::colocarFila(Aluno *aluno) {
         EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
         filaEspera.insert(aluno);
     }
-//    if(turma.getLength() == 0 && encheuTurma == true){
+//    if(turma.getLength() capacidade && encheuTurma == false){
 //       encheuTurma = false;
 //    }
 
@@ -179,10 +192,10 @@ void SegundoPeriodo::destinoAluno(Aluno *aluno) {
     //probabilidade do aluno se evadir
     if (probabilidade >= 1) {
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
-        if (aluno->getNota() >= 3) {
+        if (aluno->getNota() >= 4) {
 
             aluno->setProcessando(false);
-            EV << "Enviando \"" << aluno->getNumero()   << "\" sendo enviado para outro periodo " << endl;
+            EV << "Aprovado e \"" << aluno->getNumero()   << "\" sendo enviado para Terceiro periodo " << endl;
 
             //colecao.push_back(aluno);
             send(aluno, "saida", 0);
@@ -190,7 +203,7 @@ void SegundoPeriodo::destinoAluno(Aluno *aluno) {
         }
         // senao, entra na porta saida que leva para o periodo atual
         else {
-            EV << "Enviando \"" << aluno->getNumero() << "\" para o mesmo periodo na fila de espera " << filaEspera.getLength() + 1 << " " << endl;
+            EV << "Reprovado \"" << aluno->getNumero() << "\" para o mesmo periodo na fila de espera " << filaEspera.getLength() + 1 << " " << endl;
             //o aluno entra na fila de espera para a pro turma
             aluno->setQtdMatriculas(aluno->getQtdMatriculas() + 1);
             filaEspera.insert(aluno);

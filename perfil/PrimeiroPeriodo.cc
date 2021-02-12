@@ -26,7 +26,7 @@ class PrimeiroPeriodo : public cSimpleModule {
 
     bool encheuTurma;
     cHistogram turmaEspera;
-    virtual void processar(Aluno *msg);
+    virtual void processar();
     virtual void colocarFila(Aluno *msg);
 
   protected:
@@ -64,10 +64,10 @@ void PrimeiroPeriodo::initialize() {
 void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
-        //EV << " Criando turmas de 10 alunos Ingressantes " << endl;
+        EV << " Criando turmas de 10 alunos Ingressantes " << endl;
         encheuTurma = false;
         //indica que pode enviar os alunos para o prox periodo
-
+        //processar();
         //delete aluno;
     } else {
         EV << "Ingressante - Recebeu \"" << aluno->getNumero() << "\"  status processamento: " << aluno->getProcessando() << endl;
@@ -84,27 +84,8 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
             // se nota maior que 70, entra na porta saida que leva para o proximo periodo
             destinoAluno(alunoParaEnvio);
 
-            delete processando;
-            if (turma.isEmpty()) {
-                processando = nullptr;
-                Aluno * turma = new Aluno();
-                turma->setNome("turma");
-                EV << "\n !!Enviando alunos para o prox periodo.!! \n " << endl;
-                for (int i = 0; i < colecao.size(); i++) {
-                    Aluno *envio = colecao[i];
-                    send(envio, "saida", 1);
-                }
-                colecao.clear();
-                //envia mensagem para criar nova turma no prox periodo
-                send(turma, "saida", 0);
+
             } else {
-                processando = alunoPrioridade(aluno);
-                processar(processando);
-            }
-        } else if (!processando) {
-            processando = alunoPrioridade(aluno);
-            processar(processando);
-        } else {
             //senao se estiver em analise, coloca o aluno que chegou na filaelse {
             colocarFila(aluno);
         }
@@ -113,11 +94,25 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
 }
 
 
-void PrimeiroPeriodo::processar(Aluno *aluno) {
-    simtime_t tempoServico = exponential(tempoProcessamento);
-    EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
-    aluno->setProcessando(true);
-    scheduleAt(simTime()+0.02, aluno);
+void PrimeiroPeriodo::processar() {
+    while (!turma.isEmpty()) {
+        Aluno *aluno = check_and_cast<Aluno*>(turma.pop());
+        simtime_t tempoServico = exponential(tempoProcessamento);
+        EV << "Processando \"" << aluno->getNumero() << "\" por "  << tempoServico << "s." << endl;
+        aluno->setProcessando(true);
+        destinoAluno(aluno);
+    }
+    if (turma.isEmpty()) {
+
+        Aluno *turma = new Aluno();
+        turma->setNome("turma");
+        EV << "\n !!Enviando alunos para o Segundo Periodo.!! \n " << endl;
+        //envia mensagem para criar nova turma no prox periodo
+        send(turma, "saida", 0);
+        encheuTurma = false;
+    }
+
+
 }
 
 
@@ -127,6 +122,10 @@ void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
     if (turma.getLength() < capacidadeFila && encheuTurma == false) {
         EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: "  << turma.getLength() + 1 << ")." << endl;
         turma.insert(aluno);
+        if(turma.getLength() == capacidadeFila){
+            encheuTurma = true;
+            processar();
+        }
     } else
     //turma igual a capacidade
     if (encheuTurma == false) {
@@ -134,6 +133,7 @@ void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
         //Encheu a turma
         encheuTurma = true;
         filaEspera.insert(aluno);
+
     } else if (encheuTurma) {
         EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
         filaEspera.insert(aluno);
@@ -196,9 +196,9 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
         if (aluno->getNota() >= 3) {
 
             aluno->setProcessando(false);
-            EV << "Aprovado e \"" << aluno->getNumero()   << "\" será enviado para outro periodo " << endl;
-            colecao.push_back(aluno);
-            //send(aluno, "saida", 0);
+            EV << "Aprovado e \"" << aluno->getNumero()   << "\" será enviado para o Segundo periodo " << endl;
+            //colecao.push_back(aluno);
+            send(aluno, "saida", 0);
 
         }
         // senao, entra na porta saida que leva para o periodo atual

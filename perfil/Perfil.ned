@@ -17,7 +17,7 @@ simple PrimeiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(20);
+        int capacidadeFila = default(10);
     gates:
         input entrada[20];
         output saida[20];
