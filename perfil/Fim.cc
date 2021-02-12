@@ -39,7 +39,7 @@ void Fim::handleMessage(cMessage *msg) {
 }
 
 void Fim::finish(){
-       EV << "Raça, media de racas:   " << filaStats.getMean() << endl;
+       EV << "\n Raça, media de racas:   " << filaStats.getMean() << endl;
        EV << "Raca, desvio padrao: " << filaStats.getStddev() << endl;
        EV << "Raca valor maximo: " << filaStats.getMax() << endl;
        EV << "Raca valor minimo: " << filaStats.getMin() << endl;

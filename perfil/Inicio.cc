@@ -50,9 +50,9 @@ void Inicio::handleMessage(cMessage *msg) {
 }
 
 void Inicio::enviarNovaTurma() {
-    Aluno * turma = new Aluno();
-            turma->setNome("turma");
-            scheduleAt(simTime()+tempo(), turma);
+    Aluno *turma = new Aluno();
+    turma->setNome("turma");
+    send(turma, "saida", 1);
     for (int i = 0; i < gateSize("saida"); i++) {
         int rnum = std::rand();
         int nota =  rnum % 10+1;
@@ -67,7 +67,7 @@ void Inicio::enviarNovaTurma() {
         aluno->setFaltas(0);
         aluno->setRaca(2);
         aluno->setIngressante(true);
-        EV << "Enviando aluno \"" << aluno->getNumero() << "\"" << endl;
+        //EV << "Enviando aluno \"" << aluno->getNumero() << "\"" << endl;
         racaStats.collect(1.0 * aluno->getEvadido());
 
         //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
@@ -80,12 +80,12 @@ void Inicio::enviarNovaTurma() {
 }
 
 double Inicio::tempo(){
-    if(count > 20){
+    if(count > 10){
         //tempo contado como dias, a cada 20 alunos, o tempo aumenta para 60 dias para diminuir a fila de espera
         return 6.0;
     }else{
         //tempo relativo dias
-        return 6.0;
+        return 0.0;
     }
 }
 

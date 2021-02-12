@@ -23,11 +23,11 @@ simple PrimeiroPeriodo
         output saida[20];
 }
 
-simple TerceiroPeriodo
+simple SegundoPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(2);
+        int capacidadeFila = default(10);
     gates:
         input entrada[20];
         output saida[20];
@@ -94,17 +94,17 @@ network Perfil
             @display("i=,yellow1;p=29,93");
         }
         primeiroPeriodo: PrimeiroPeriodo {
-            @display("i=,purple;p=148,93");
+            @display("i=,purple;p=172,93");
         }
-//        terceiroPeriodo: TerceiroPeriodo {
-//            @display("i=,grey;p=273,93");
-//        }
-//        quintoPeriodo: QuintoPeriodo {
-//            @display("i=,pink;p=405,93");
-//        }
-//        sextoPeriodo: SextoPeriodo {
-//            @display("i=,white;p=537,93");
-//        }
+        segundoPeriodo: SegundoPeriodo {
+                    @display("i=,grey;p=273,93");
+        }
+        //        quintoPeriodo: QuintoPeriodo {
+        //            @display("i=,pink;p=405,93");
+        //        }
+        //        sextoPeriodo: SextoPeriodo {
+        //            @display("i=,white;p=537,93");
+        //        }
         //        especifica1: Especifica {
         //            @display("i=,darkblue;p=29,117");
         //        }
@@ -115,27 +115,27 @@ network Perfil
         //            @display("i=,red;p=43,45");
         //        }
         fim: Fim {
-            @display("i=,red;p=537,209");
+            @display("i=,red;p=364,93");
         }
     connections:
 
         for i=0..9 {
             inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
-            primeiroPeriodo.saida[i] --> D --> fim.entrada[i];
+            primeiroPeriodo.saida[i] --> D --> segundoPeriodo.entrada[i];
             primeiroPeriodo.saida[i + 10] --> D --> primeiroPeriodo.entrada[i + 10];
-            
-            //terceiroPeriodo.saida[i] --> D --> quintoPeriodo.entrada[i];
-            //terceiroPeriodo.saida[i + 10] --> D --> terceiroPeriodo.entrada[i + 10];
-            
+				
+           segundoPeriodo.saida[i] --> D --> fim.entrada[i];
+           segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
+
             //quintoPeriodo.saida[i] --> D --> sextoPeriodo.entrada[i];
             //quintoPeriodo.saida[i + 10] --> D --> quintoPeriodo.entrada[i + 10];
-            
+
             //sextoPeriodo.saida[i] --> D --> fim.entrada[i];            
             //sextoPeriodo.saida[i + 10] --> D --> sextoPeriodo.entrada[i + 10];
 
 
         }
-
+	
 //        comum.saida++ --> D --> especifica1.entrada;
 //        comum.saida++ --> D --> especifica2.entrada;
 //        especifica1.saida --> D --> fim.entrada++;
