@@ -22,6 +22,7 @@ class Inicio : public cSimpleModule {
     cHistogram racaStats;
     int portaSaida = 0;
     bool controle =false;
+    double i = 0.0;
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
@@ -33,12 +34,10 @@ class Inicio : public cSimpleModule {
 Define_Module(Inicio);
 
 void Inicio::initialize() {
-    countRaca = 0;
-    indio = 0;
-    enviarNovaTurma();
-    enviarNovaTurma();
-    enviarNovaTurma();
 
+    for (int var = 0; var < 10; ++var) {
+        enviarNovaTurma();
+    }
 }
 
 void Inicio::handleMessage(cMessage *msg) {
@@ -51,24 +50,15 @@ void Inicio::enviarNovaTurma() {
     Aluno *turma = new Aluno();
     turma->setNome("turma");
     send(turma, "saida", 1);
-    EV << "\n Enviando turmas de 10 alunos \n" << endl;
-    for (int i = 0; i < gateSize("saida"); i++) {
+    //EV << "\n Enviando turmas de 10 alunos \n" << endl;
+    for (int i = 0; i < 10; ++i) {
         int rnum = std::rand();
         int nota =  rnum % 10+1;
-        int numero = count++;
-        SimTime time = simTime();
+        int numero = ++count;
+
         Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
-        //geração da raca
-        indio++;
-        countRaca++;
-        int raca = 1;
-        aluno->setEvadido(0);
-        aluno->setFaltas(0);
-        aluno->setRaca(2);
         aluno->setIngressante(true);
-
-        racaStats.collect(1.0 * aluno->getEvadido());
-
+        //EV << "\n Enviando aluno \"" << aluno->getNumero()   << "\" como Ingressante. \n" << endl;
         //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
         //primeiro periodo de modo a nao gerar filas.
 
@@ -80,15 +70,16 @@ void Inicio::enviarNovaTurma() {
 
 double Inicio::tempo(){
     double contagem = 0.0;
-    if(count >= 11){
+    int i = 10;
+    if(count > i){
         contagem = contagem + 6.0;
-    }
-    if(count >= 21){
-        contagem = contagem + 6.0;
-    }
-    if(count >= 31){
+        i = i +10;
+        while(count > i){
             contagem = contagem + 6.0;
-       }
+            i = i +10;
+        }
+    }
+
     return contagem;
 }
 

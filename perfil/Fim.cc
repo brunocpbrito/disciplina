@@ -32,7 +32,7 @@ void Fim::initialize() {
 
 void Fim::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno *>(msg);
-    EV << "final vindo do  \""<< aluno->getNome() << " teve nota \"" << aluno->getNota() << " \n";
+    //EV << "final vindo do  \""<< aluno->getNome() << " teve nota \"" << aluno->getNota() << " \n";
     this->calculaEvasao(aluno);
     filaStats.collect(1.0 * aluno->getRaca());
     statsEvasao.collect(1.0 * aluno->getEvadido());
