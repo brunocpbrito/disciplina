@@ -94,10 +94,10 @@ network Perfil
             @display("i=,yellow1;p=29,93");
         }
         primeiroPeriodo: PrimeiroPeriodo {
-            @display("i=,purple;p=172,93");
+            @display("i=,purple;p=148,93");
         }
         segundoPeriodo: SegundoPeriodo {
-                    @display("i=,grey;p=273,93");
+            @display("i=,grey;p=264,93");
         }
         //        quintoPeriodo: QuintoPeriodo {
         //            @display("i=,pink;p=405,93");
@@ -123,9 +123,9 @@ network Perfil
             inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
             primeiroPeriodo.saida[i] --> D --> segundoPeriodo.entrada[i];
             primeiroPeriodo.saida[i + 10] --> D --> primeiroPeriodo.entrada[i + 10];
-				
-           segundoPeriodo.saida[i] --> D --> fim.entrada[i];
-           segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
+
+            segundoPeriodo.saida[i] --> D --> fim.entrada[i];
+            segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
 
             //quintoPeriodo.saida[i] --> D --> sextoPeriodo.entrada[i];
             //quintoPeriodo.saida[i + 10] --> D --> quintoPeriodo.entrada[i + 10];
@@ -135,7 +135,7 @@ network Perfil
 
 
         }
-	
+
 //        comum.saida++ --> D --> especifica1.entrada;
 //        comum.saida++ --> D --> especifica2.entrada;
 //        especifica1.saida --> D --> fim.entrada++;

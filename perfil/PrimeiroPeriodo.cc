@@ -47,7 +47,7 @@ class PrimeiroPeriodo : public cSimpleModule {
 Define_Module(PrimeiroPeriodo);
 
 void PrimeiroPeriodo::initialize() {
-    capacidadeFila = 10;
+    capacidadeFila = 60;
     capacidade = capacidadeFila;
     encheuTurma = false;
     processando = nullptr;
@@ -64,10 +64,26 @@ void PrimeiroPeriodo::initialize() {
 void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
-        //EV << " Criando turmas de 10 alunos Ingressantes " << endl;
+        EV << "Criando turmas de alunos do Primeiro Periodo - Ingressantes \n" << endl;
         encheuTurma = false;
-        //indica que pode enviar os alunos para o prox periodo
-        //processar();
+
+        if (turma.getLength() < capacidadeFila && !filaEspera.isEmpty()) {
+            EV << "Turma com " << turma.getLength() << " alunos, restando " << (capacidadeFila - turma.getLength())  << " vagas. Pegando alunos da fila de espera do Primeiro Periodo, ate completar as vagas. \n"  << endl;
+            while (turma.getLength() < capacidadeFila) {
+                if (!filaEspera.isEmpty()) {
+
+                    Aluno *alunoFila = check_and_cast<Aluno*>(filaEspera.pop());
+                    turma.insert(alunoFila);
+                } else {
+
+                    break;
+                }
+            }
+            EV << "Criando turmas de "<< turma.getLength() <<" alunos - Ingressantes \n" << endl;
+
+        }
+        //colocarFila(aluno);
+        processar();
         //delete aluno;
     } else {
         //EV << "Ingressante - Recebeu \"" << aluno->getNumero() << "\"  status processamento: " << aluno->getProcessando() << endl;
@@ -121,23 +137,35 @@ void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
     //turma menor que a capacidade e nao encheu
     if (turma.getLength() < capacidadeFila && encheuTurma == false) {
         //EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: "  << turma.getLength() + 1 << ")." << endl;
-        turma.insert(aluno);
-        if(turma.getLength() == capacidadeFila){
+        if(aluno->getNome() != "turma"){
+            turma.insert(aluno);
+            if (turma.getLength() == capacidadeFila ) {
+                encheuTurma = true;
+                EV << "\n Turma do Primeiro completa, iniciando semestre. \n"   << endl;
+                processar();
+            }
+        }else{
             encheuTurma = true;
-            EV << "\n Turma do Primeiro completa, iniciando semestre. \n"  << endl;
+            EV << "\n Turma do Primeiro completa, iniciando semestre. \n"   << endl;
             processar();
         }
+
     } else
     //turma igual a capacidade
     if (encheuTurma == false) {
-        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
+        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() << "." << endl;
         //Encheu a turma
         encheuTurma = true;
-        filaEspera.insert(aluno);
+        if(aluno->getNome() != "turma"){
+             filaEspera.insert(aluno);
+        }
 
     } else if (encheuTurma) {
         EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
-        filaEspera.insert(aluno);
+        if(aluno->getNome() != "turma"){
+            filaEspera.insert(aluno);
+        }
+
     }
 //    if(turma.getLength() == 0 && encheuTurma == true){
 //       encheuTurma = false;
@@ -176,12 +204,10 @@ Aluno* PrimeiroPeriodo::alunoPrioridade(Aluno *aluno) {
 }
 
 void PrimeiroPeriodo::finish(){
-    EV << "\n Fila de espera" << endl;
-    EV << "Valores para a fila de espera" << endl;
+    EV << "\n Valores para a fila de espera do Primeiro Periodo" << endl;
     EV << " Fila de espera, min:    " << turmaEspera.getMin() << endl;
     EV << " Fila de espera, max:    " << turmaEspera.getMax() << endl;
-    EV << " Fila de espera, mean:   " << turmaEspera.getMean() << endl;
-    EV << " Fila de espera, stddev: " << turmaEspera.getStddev() << endl;
+    EV << " Fila de espera, media:   " << turmaEspera.getMean() << endl;
     EV << " Total da fila de espera no momento: " << filaEspera.getLength() << endl;
     EV << " Total de evadidos no momento: " << filaEvadidos.getLength() << endl;
     turmaEspera.recordAs("Espera");

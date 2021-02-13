@@ -20,9 +20,9 @@ class Inicio : public cSimpleModule {
     cQueue fila;
     int count = 0;
     cHistogram racaStats;
-    int portaSaida = 0;
-    bool controle =false;
-    double i = 0.0;
+    int qtdeAlunos = 41;
+    int entradas = 10;
+    double t = 0.0;
   protected:
     virtual void initialize() override;
     virtual void handleMessage(cMessage *msg) override;
@@ -35,7 +35,7 @@ Define_Module(Inicio);
 
 void Inicio::initialize() {
 
-    for (int var = 0; var < 10; ++var) {
+    for (int var = 0; var < entradas; ++var) {
         enviarNovaTurma();
     }
 }
@@ -47,11 +47,12 @@ void Inicio::handleMessage(cMessage *msg) {
 }
 
 void Inicio::enviarNovaTurma() {
-    Aluno *turma = new Aluno();
-    turma->setNome("turma");
-    send(turma, "saida", 1);
-    //EV << "\n Enviando turmas de 10 alunos \n" << endl;
-    for (int i = 0; i < 10; ++i) {
+    //Aluno *turma = new Aluno();
+    //turma->setNome("turma");
+    //send(turma, "saida", 1);
+    int cont = 0;
+
+    for (int i = 0; i < qtdeAlunos; ++i) {
         int rnum = std::rand();
         int nota =  rnum % 10+1;
         int numero = ++count;
@@ -62,21 +63,29 @@ void Inicio::enviarNovaTurma() {
         //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
         //primeiro periodo de modo a nao gerar filas.
 
-        scheduleAt(simTime()+tempo(), aluno);
+        ++cont;
+
+        if(cont == qtdeAlunos){
+            aluno->setNome("turma");
+            scheduleAt(simTime()+tempo(), aluno);
+            --count;
+        }else{
+            scheduleAt(simTime()+tempo(), aluno);
+        }
+
     }
-    controle = false;
 
 }
 
 double Inicio::tempo(){
     double contagem = 0.0;
-    int i = 10;
-    if(count > i){
+    int t = qtdeAlunos;
+    if(count > t){
         contagem = contagem + 6.0;
-        i = i +10;
-        while(count > i){
+        t = t + qtdeAlunos;
+        while(count > t){
             contagem = contagem + 6.0;
-            i = i +10;
+            t = t + qtdeAlunos;
         }
     }
 
@@ -84,7 +93,7 @@ double Inicio::tempo(){
 }
 
 void Inicio::finish(){
-    EV << countRaca << endl;
+    EV << "Enviado "<< entradas<< " entradas com "<< qtdeAlunos-1 << " alunos cada." << endl;
 }
 
 

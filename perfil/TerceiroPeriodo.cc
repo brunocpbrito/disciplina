@@ -48,7 +48,7 @@ class SegundoPeriodo : public cSimpleModule {
 Define_Module(SegundoPeriodo);
 
 void SegundoPeriodo::initialize() {
-    capacidadeFila = 10;
+    capacidadeFila = 60;
     capacidade = capacidadeFila;
     encheuTurma = false;
     processando = nullptr;
@@ -58,11 +58,11 @@ void SegundoPeriodo::initialize() {
 void SegundoPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
-        EV << "\n Criando turmas de 10 alunos no Segundo Periodo. \n" << endl;
+        EV << "\n Criando turmas de "<< capacidadeFila <<" alunos no Segundo Periodo. \n" << endl;
         encheuTurma = false;
 
         if(turma.getLength() < capacidadeFila && !filaEspera.isEmpty()){
-            EV << "Turma com " << turma.getLength() << " alunos, restando " << (10 - turma.getLength() ) << " vagas. Pegando alunos da fila de espera do Segundo Periodo, ate completar as vagas. \n" << endl;
+            EV << "Turma com " << turma.getLength() << " alunos, restando " << (capacidadeFila - turma.getLength() ) << " vagas. Pegando alunos da fila de espera do Segundo Periodo, ate completar as vagas. \n" << endl;
             while(turma.getLength() < capacidadeFila){
                 if(!filaEspera.isEmpty()){
 
@@ -72,6 +72,7 @@ void SegundoPeriodo::handleMessage(cMessage *msg) {
                     break;
                 }
             }
+            EV << "Criando turmas de "<< turma.getLength() <<" alunos  \n" << endl;
         }
         processar();
         //delete aluno;
@@ -178,11 +179,10 @@ Aluno* SegundoPeriodo::alunoPrioridade(Aluno *aluno) {
 }
 
 void SegundoPeriodo::finish(){
-    EV << "\n Fila de espera" << endl;
-    EV << "Valores para a fila de espera" << endl;
+    EV << "\n Valores para a fila de espera do Segundo Periodo" << endl;
     EV << " Fila de espera, min:    " << turmaEspera.getMin() << endl;
     EV << " Fila de espera, max:    " << turmaEspera.getMax() << endl;
-    EV << " Fila de espera, mean:   " << turmaEspera.getMean() << endl;
+    EV << " Fila de espera, media:   " << turmaEspera.getMean() << endl;
     EV << " Total da fila de espera no momento: " << filaEspera.getLength() << endl;
     EV << " Total de evadidos no momento: " << filaEvadidos.getLength() << endl;
     turmaEspera.recordAs("Espera");
