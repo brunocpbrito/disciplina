@@ -62,7 +62,7 @@ void SegundoPeriodo::handleMessage(cMessage *msg) {
         encheuTurma = false;
 
         if(turma.getLength() < capacidadeFila && !filaEspera.isEmpty()){
-            EV << "Turma com vagas, pegando alunos da fila de espera do Segundo Periodo, até completar as vagas. \n" << endl;
+            EV << "Turma com " << turma.getLength() << " alunos, restando " << (10 - turma.getLength() ) << " vagas. Pegando alunos da fila de espera do Segundo Periodo, ate completar as vagas. \n" << endl;
             while(turma.getLength() < capacidadeFila){
                 if(!filaEspera.isEmpty()){
 
