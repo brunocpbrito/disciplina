@@ -13,7 +13,8 @@ using namespace omnetpp;
 class TerceiroPeriodo : public cSimpleModule {
   private:
     int capacidadeFila;
-    int capacidade;
+    int probReprovacao;
+    int probEvasao;
     bool pegarEspera;
     cQueue turma;
     cQueue filaEspera;
@@ -37,15 +38,16 @@ class TerceiroPeriodo : public cSimpleModule {
     virtual void destinoAluno(Aluno * aluno);
     double notaAleatoria(){
        int rnum = std::rand();
-       return rnum % 10;
+       return rnum % 100;
     };
 };
 
 Define_Module(TerceiroPeriodo);
 
 void TerceiroPeriodo::initialize() {
-    capacidadeFila = par("capacidadeFila");;
-    capacidade = capacidadeFila;
+    capacidadeFila = par("capacidadeTurma");;
+    probReprovacao = par("probReprovacaoAluno");
+    probEvasao = par("probEvasao");
     pegarEspera = true;
 
 }
@@ -88,6 +90,7 @@ void TerceiroPeriodo::processar() {
         simtime_t tempoServico = exponential(tempoProcessamento);
         //EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
         aluno->setProcessando(true);
+        aluno->setNota(notaAleatoria());
         destinoAluno(aluno);
     }
     if (turma.isEmpty()) {
@@ -172,11 +175,11 @@ void TerceiroPeriodo::finish(){
 void TerceiroPeriodo::destinoAluno(Aluno *aluno) {
 
     int rnum = std::rand();
-    int probabilidade = rnum % 10;
+    int probabilidade = rnum % 100;
     //probabilidade do aluno se evadir
-    if (probabilidade >= 1) {
+    if (probabilidade >= probEvasao) {
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
-        if (aluno->getNota() >= 3) {
+        if (aluno->getNota() >= probReprovacao) {
 
             aluno->setProcessando(false);
             EV << "Aprovado aluno \"" << aluno->getNumero()   << "\" sendo enviado para Quarto periodo " << endl;

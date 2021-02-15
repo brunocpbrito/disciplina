@@ -21,7 +21,7 @@ class Inicio : public cSimpleModule {
     int count = 0;
     cHistogram racaStats;
     int qtdeAlunos;
-    int entradas = 10;
+    int entradas;
     double t = 0.0;
   protected:
     virtual void initialize() override;
@@ -34,6 +34,7 @@ class Inicio : public cSimpleModule {
 Define_Module(Inicio);
 
 void Inicio::initialize() {
+    entradas = par("entradas");
     qtdeAlunos = par("qtdeAlunos");
     for (int var = 0; var < entradas; ++var) {
         enviarNovaTurma();
@@ -54,10 +55,10 @@ void Inicio::enviarNovaTurma() {
 
     for (int i = 0; i < qtdeAlunos; ++i) {
         int rnum = std::rand();
-        int nota =  rnum % 10+1;
+
         int numero = ++count;
 
-        Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
+        Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), 0.0);
         aluno->setIngressante(true);
         //EV << "\n Enviando aluno \"" << aluno->getNumero()   << "\" como Ingressante. \n" << endl;
 
