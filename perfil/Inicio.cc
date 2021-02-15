@@ -47,10 +47,13 @@ void Inicio::handleMessage(cMessage *msg) {
 
 }
 
+/*
+ * Metodo que envia uma turma com entradas e quantidade definidas.
+ * Ao finao da ultima iteracao eh enviado uma mensagem de Turma, significando que o periodo
+ * seguinte deve processar a turma enviada.
+ */
 void Inicio::enviarNovaTurma() {
-    //Aluno *turma = new Aluno();
-    //turma->setNome("turma");
-    //send(turma, "saida", 1);
+
     int cont = 0;
 
     for (int i = 0; i < qtdeAlunos; ++i) {
@@ -64,7 +67,9 @@ void Inicio::enviarNovaTurma() {
 
         ++cont;
 
+        //caso a quantidade seja igual a 41, 51, ou 61 ou qualquer outro semelhante a depender do parametro.
         if(cont == qtdeAlunos){
+            //envia mensagem de Turma
             aluno->setNome("turma");
             scheduleAt(simTime()+tempo(), aluno);
             --count;
@@ -76,6 +81,10 @@ void Inicio::enviarNovaTurma() {
 
 }
 
+/*
+ * Metodo que verifica se uma turma foi enviado por completo para a escolha do tempo.
+ * Em caso positivo incrementa o tempo da prox turma para enviar num momento posterior.
+ */
 double Inicio::tempo(){
     double contagem = 0.0;
     int t = qtdeAlunos;
@@ -87,7 +96,6 @@ double Inicio::tempo(){
             t = t + qtdeAlunos;
         }
     }
-
     return contagem;
 }
 

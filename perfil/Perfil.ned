@@ -7,8 +7,14 @@ simple Inicio
 {
     parameters:
         @display("i=old/folder;i2=status/red, purple");
-        int qtdeAlunos = default(40+1);  //quantidade de alunos numa entrada
-        int entradas = default(10);      //quantidade de entradas(periodos) de uma turma
+        int quantidadeAlunos = default(40);    //quantidade de alunos numa entrada
+        int entradas = default(10);            //quantidade de entradas(periodos) de uma turma. 
+        									   //Ex.2021.1, 2020.2, 2021.1, 2021.2
+        
+        //Este parametro serve apenas como artificio para controle de codigo, 
+        //desconsiderar como parametros para turma
+        int qtdeAlunos = quantidadeAlunos + 1;        
+
     gates:
         //input entrada;
         output saida[1];
@@ -19,8 +25,8 @@ simple PrimeiroPeriodo
     parameters:
         @display("i=old/folder;i2=status/red, red");
         int capacidadeTurma = default(60);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(10); //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);          //porcentagem da probabilidade de um aluno se evadir
+        int probReprovacaoAluno = default(10);  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
     gates:
         input entrada[1];
         output saida[1];
@@ -31,8 +37,8 @@ simple SegundoPeriodo
     parameters:
         @display("i=old/folder;i2=status/red, red");
         int capacidadeTurma = default(60);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(20); //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);          //porcentagem da probabilidade de um aluno se evadir
+        int probReprovacaoAluno = default(20);  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
     gates:
         input entrada[1];
         output saida[1];
@@ -42,8 +48,8 @@ simple TerceiroPeriodo
     parameters:
         @display("i=old/folder;i2=status/red, red");
         int capacidadeTurma = default(40);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(10); //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);          //porcentagem da probabilidade de um aluno se evadir
+        int probReprovacaoAluno = default(10);  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
     gates:
         input entrada[1];
         output saida[1];

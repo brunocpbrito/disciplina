@@ -50,11 +50,16 @@ void PrimeiroPeriodo::initialize() {
     pegarEspera = true;
 }
 
+/*
+ * Metodo que recebe uma mensagem do periodo anterior. Se a mensagem for um Aluno, então este eh colocado na
+ * fila(turma). Se a mensagem for Turma, então processa a turma existente enviando para o prox periodo
+ */
 void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
         //EV << "\n Criando turmas de "<< capacidadeFila <<" alunos no PrimeiroPeriodo. \n" << endl;
 
+        //caso a turma seja menor que a capacidade, então pega da turma de espera ate completar as vagas restantes.
         if (pegarEspera) {
             if (turma.getLength() < capacidadeFila && !filaEspera.isEmpty()) {
                 EV << "\n Turma com " << turma.getLength()  << " alunos, restando "   << (capacidadeFila - turma.getLength())  << " vagas. Pegando alunos da fila de espera ("   << filaEspera.getLength()   << ") do Primeiro Periodo, ate completar as vagas. \n" << endl;
@@ -69,6 +74,7 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
             }
         }
 
+        //processa a turma existente capturando os valores para medir
         EV << "\n Criando turma no Primeiro Periodo de "<< turma.getLength() <<" alunos e fila de espera "<< filaEspera.getLength() <<" \n" << endl;
         turmaEspera.collect(filaEspera.getLength());
         mediaTurma.collect(turma.getLength());
@@ -81,6 +87,11 @@ void PrimeiroPeriodo::handleMessage(cMessage *msg) {
     }
 }
 
+/*
+ * Metodo que processa os alunos de uma turma, atribuindo notas aleatorias e colocando como processados e
+ * em seguida enviando ao prox periodo.
+ * Envia ao final uma mensagem de Turma que significa que o prox periodo tera que processar esta turma.
+ */
 void PrimeiroPeriodo::processar() {
     while (!turma.isEmpty()) {
         Aluno *aluno = check_and_cast<Aluno*>(turma.pop());
@@ -91,7 +102,6 @@ void PrimeiroPeriodo::processar() {
         destinoAluno(aluno);
     }
     if (turma.isEmpty()) {
-
         Aluno *turma = new Aluno();
         turma->setNome("turma");
         EV << "\n !!Enviando alunos para o Segundo Periodo.!! \n " << endl;
@@ -101,23 +111,23 @@ void PrimeiroPeriodo::processar() {
 
 }
 
-
+/*
+ * Metodo que coloca um aluno na turma enquanto houver vagas. Uma vez a turma cheia, os alunos vao para a fila de
+ * espera.
+ */
 void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
-    //a turma so eh enchida uma vez por leva de alunos. Uma vez enchida, so sera novamente na prox leva
-    //turma menor que a capacidade e nao encheu
+
     if (turma.getLength() < capacidadeFila) {
         //EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: "  << turma.getLength() + 1 << ")." << endl;
         turma.insert(aluno);
         if (turma.getLength() == capacidadeFila) {
             EV << "\n Turma do Primeiro Periodo com "<< turma.getLength() <<" completa, o resto vai para a fila de espera. \n"  << endl;
-
         }
     } else {
         EV << "Turma cheia, aluno "<<aluno->getNumero() <<" vai para a fila de espera (" << filaEspera.getLength() << ")." << endl;
         //Encheu a turma
         filaEspera.insert(aluno);
     }
-
 
 }
 
@@ -139,6 +149,11 @@ void PrimeiroPeriodo::finish(){
     EV << "Total de evadidos no momento: " << filaEvadidos.getLength() << endl;
 }
 
+/*
+ * Metodo que verifica o destino do aluno na turma, se aprovado e segue para o prox periodo,
+ * se reprovado e volta ao mesmo periodo ou se evadido e saira do sistema.
+ * Os valores sao baseados em parametros do arquivo .ned.
+ */
 void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
 
     int rnum = std::rand();
