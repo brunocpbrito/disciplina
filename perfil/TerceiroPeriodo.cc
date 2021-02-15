@@ -169,7 +169,7 @@ void TerceiroPeriodo::finish(){
     EV << "  Turma, media:   " << mediaTurma.getMean() << endl;
     EV << "  Turma, desvio padrao:   " << mediaTurma.getStddev() << endl;
     EV << "Total de reprovados no momento: " << filaEspera.getLength() << endl;
-    EV << "Total de evadidos no momento: " << filaEvadidos.getLength() << endl;
+    EV << "Total de evadidos: " << filaEvadidos.getLength() << endl;
 }
 
 void TerceiroPeriodo::destinoAluno(Aluno *aluno) {
