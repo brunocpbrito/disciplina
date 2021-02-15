@@ -104,9 +104,16 @@ void PrimeiroPeriodo::processar() {
     if (turma.isEmpty()) {
         Aluno *turma = new Aluno();
         turma->setNome("turma");
-        EV << "\n !!Enviando alunos para o Segundo Periodo.!! \n " << endl;
+        EV << "\n !!Enviando alunos para Disciplina B do Segundo Periodo.!! \n " << endl;
         //envia mensagem para criar nova turma no prox periodo
         send(turma, "saida", 0);
+
+        Aluno *turma2 = new Aluno();
+        turma2->setNome("turma");
+        EV << "\n !!Enviando alunos para Disciplina C do Segundo Periodo.!! \n " << endl;
+        //envia mensagem para criar nova turma no prox periodo
+        send(turma2, "saida", 1);
+
     }
 
 }
@@ -166,8 +173,13 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
             aluno->setProcessando(false);
             EV << "Aprovado aluno \"" << aluno->getNumero()   << "\" sendo enviado para Segundo periodo " << endl;
 
-            //colecao.push_back(aluno);
+            Aluno *copiaAluno = new Aluno();
+            copiaAluno->setNumero(aluno->getNumero());
+            copiaAluno->setNome(aluno->getNome());
+            copiaAluno->setNota(aluno->getNota());
+
             send(aluno, "saida", 0);
+            send(copiaAluno, "saida", 1);
 
         }
         // senao, entra na porta saida que leva para o periodo atual

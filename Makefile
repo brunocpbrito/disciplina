@@ -32,10 +32,10 @@ O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 # Object files for local .cc, .msg and .sm files
 OBJS = \
     $O/perfil/Aluno.o \
-    $O/perfil/Comum.o \
     $O/perfil/Especifica.o \
     $O/perfil/Fim.o \
     $O/perfil/Inicio.o \
+    $O/perfil/Merge.o \
     $O/perfil/PrimeiroPeriodo.o \
     $O/perfil/SegundoPeriodo.o \
     $O/perfil/SextoPeriodo.o \

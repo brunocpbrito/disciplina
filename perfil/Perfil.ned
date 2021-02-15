@@ -10,10 +10,10 @@ simple Inicio
         int quantidadeAlunos = default(40);    //quantidade de alunos numa entrada
         int entradas = default(10);            //quantidade de entradas(periodos) de uma turma. 
         									   //Ex.2021.1, 2020.2, 2021.1, 2021.2
-        
+
         //Este parametro serve apenas como artificio para controle de codigo, 
         //desconsiderar como parametros para turma
-        int qtdeAlunos = quantidadeAlunos + 1;        
+        int qtdeAlunos = quantidadeAlunos + 1;
 
     gates:
         //input entrada;
@@ -29,13 +29,13 @@ simple PrimeiroPeriodo
         int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
     gates:
         input entrada[1];
-        output saida[1];
+        output saida[2];
 }
 
 simple SegundoPeriodo
 {
     parameters:
-        @display("i=old/folder;i2=status/red, red");
+        @display("i=old/folder;i2=status/red,red");
         int capacidadeTurma = default(60);      //capacidade maxima da turma
         int probReprovacaoAluno = default(20);  //porcentagem da probablidade de um aluno reprovar o periodo
         int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
@@ -46,7 +46,7 @@ simple SegundoPeriodo
 simple TerceiroPeriodo
 {
     parameters:
-        @display("i=old/folder;i2=status/red, red");
+        @display("i=old/folder;i2=status/red,red");
         int capacidadeTurma = default(40);      //capacidade maxima da turma
         int probReprovacaoAluno = default(10);  //porcentagem da probablidade de um aluno reprovar o periodo
         int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
@@ -55,30 +55,20 @@ simple TerceiroPeriodo
         output saida[1];
 }
 
-simple SextoPeriodo
+simple Merge
 {
     parameters:
-        @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(2);
-    gates:
-        input entrada[20];
-        output saida[20];
-}
+        @display("i=old/folder;red");
 
-simple Comum
-{
-    parameters:
-        @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(0);
     gates:
-        input entrada;
+        input entrada[2];
         output saida[1];
 }
 
 simple Especifica
 {
     parameters:
-        @display("i=old/folder;i2=status/red, red");
+        @display("i=old/folder;i2=status/red,red");
         int capacidadeFila = default(2);
     gates:
         input entrada;
@@ -102,48 +92,48 @@ network Perfil
         {
             delay = 0.2s;
         }
+        channel T extends ned.DatarateChannel
+        {
+            delay = 1s;
+        }
+
+
     submodules:
         inicio: Inicio {
-            @display("i=,yellow1;p=29,93");
+            @display("i=abstract/people,yellow1;p=29,150;i2=-");
         }
-        primeiroPeriodo: PrimeiroPeriodo {
-            @display("i=,purple;p=133,93");
+        Disciplina_A: PrimeiroPeriodo {
+            @display("i=abstract/people,purple;p=119,150;t=PRIMEIRO PERIODO,,black;i2=-");
         }
-        segundoPeriodo: SegundoPeriodo {
-            @display("i=,grey;p=239,93");
+        Disciplina_B: SegundoPeriodo {
+            @display("i=abstract/people,#FFFF80;p=221,61;t=SEGUNDO PERIODO,,#400000;i2=-");
         }
-        terceiroPeriodo: TerceiroPeriodo {
-            @display("i=,pink;p=342,93");
+        Disciplina_C: SegundoPeriodo {
+            @display("i=abstract/people,grey;p=221,251;t=SEGUNDO PERIODO,,black;i2=-");
         }
-        //        sextoPeriodo: SextoPeriodo {
-        //            @display("i=,white;p=537,93");
-        //        }
-        //        especifica1: Especifica {
-        //            @display("i=,darkblue;p=29,117");
-        //        }
-        //        especifica2: Especifica {
-        //            @display("i=,darkblue;p=99,117");
-        //        }
-        //        comum: Comum {
-        //            @display("i=,red;p=43,45");
-        //        }
-        fim: Fim {
-            @display("i=,red;p=444,93");
+        Disciplina_D: TerceiroPeriodo {
+            @display("i=abstract/people,pink;p=397,150;t=TERCEIRO PERIODO,,black;i2=-");
+        }
+        merge: Merge {
+            @display("i=block/join,orange,5;p=320,150;b=0,0,,11");
+        }
+        formados: Fim {
+            @display("i=abstract/people2,#FFFF80;p=544,149;i2=-");
         }
     connections:
 
-        inicio.saida[0] --> D --> primeiroPeriodo.entrada[0];
-        primeiroPeriodo.saida[0] --> D --> segundoPeriodo.entrada[0];
-            //primeiroPeriodo.saida[0] --> D --> primeiroPeriodo.entrada[i + 10];
+        inicio.saida[0] --> D --> Disciplina_A.entrada[0];
 
-        segundoPeriodo.saida[0] --> D --> terceiroPeriodo.entrada[0];
-            //segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
+        Disciplina_A.saida[0] --> D --> Disciplina_B.entrada[0];
+        Disciplina_A.saida[1] --> D --> Disciplina_C.entrada[0];
 
-        terceiroPeriodo.saida[0] --> D --> fim.entrada[0];
-            //quintoPeriodo.saida[i + 10] --> D --> quintoPeriodo.entrada[i + 10];
+        Disciplina_B.saida[0] --> D --> merge.entrada[0];
+        Disciplina_C.saida[0] --> D --> merge.entrada[1];
 
-            //sextoPeriodo.saida[i] --> D --> fim.entrada[i];            
-            //sextoPeriodo.saida[i + 10] --> D --> sextoPeriodo.entrada[i + 10];
+        merge.saida[0] --> D --> Disciplina_D.entrada[0];
+
+        Disciplina_D.saida[0] --> D --> formados.entrada[0];
+
 
 
 
