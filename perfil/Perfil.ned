@@ -10,7 +10,7 @@ simple Inicio
         int capacidadeFila = default(10);
     gates:
         //input entrada;
-        output saida[10];
+        output saida[1];
 }
 
 simple PrimeiroPeriodo
@@ -19,8 +19,8 @@ simple PrimeiroPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(10);
     gates:
-        input entrada[20];
-        output saida[20];
+        input entrada[1];
+        output saida[1];
 }
 
 simple SegundoPeriodo
@@ -29,17 +29,17 @@ simple SegundoPeriodo
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(10);
     gates:
-        input entrada[20];
-        output saida[20];
+        input entrada[1];
+        output saida[1];
 }
-simple QuintoPeriodo
+simple TerceiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada[20];
-        output saida[20];
+        input entrada[1];
+        output saida[1];
 }
 
 simple SextoPeriodo
@@ -78,7 +78,7 @@ simple Fim
         @display("i=old/folder;i2=status/red, red");
         int capacidadeFila = default(2);
     gates:
-        input entrada[10];
+        input entrada[1];
 }
 
 network Perfil
@@ -94,14 +94,14 @@ network Perfil
             @display("i=,yellow1;p=29,93");
         }
         primeiroPeriodo: PrimeiroPeriodo {
-            @display("i=,purple;p=148,93");
+            @display("i=,purple;p=133,93");
         }
         segundoPeriodo: SegundoPeriodo {
-            @display("i=,grey;p=264,93");
+            @display("i=,grey;p=239,93");
         }
-        //        quintoPeriodo: QuintoPeriodo {
-        //            @display("i=,pink;p=405,93");
-        //        }
+        terceiroPeriodo: TerceiroPeriodo {
+            @display("i=,pink;p=342,93");
+        }
         //        sextoPeriodo: SextoPeriodo {
         //            @display("i=,white;p=537,93");
         //        }
@@ -115,30 +115,24 @@ network Perfil
         //            @display("i=,red;p=43,45");
         //        }
         fim: Fim {
-            @display("i=,red;p=364,93");
+            @display("i=,red;p=444,93");
         }
     connections:
 
-        for i=0..9 {
-            inicio.saida[i] --> D --> primeiroPeriodo.entrada[i];
-            primeiroPeriodo.saida[i] --> D --> segundoPeriodo.entrada[i];
-            primeiroPeriodo.saida[i + 10] --> D --> primeiroPeriodo.entrada[i + 10];
+        inicio.saida[0] --> D --> primeiroPeriodo.entrada[0];
+        primeiroPeriodo.saida[0] --> D --> segundoPeriodo.entrada[0];
+            //primeiroPeriodo.saida[0] --> D --> primeiroPeriodo.entrada[i + 10];
 
-            segundoPeriodo.saida[i] --> D --> fim.entrada[i];
-            segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
+        segundoPeriodo.saida[0] --> D --> terceiroPeriodo.entrada[0];
+            //segundoPeriodo.saida[i + 10] --> D --> segundoPeriodo.entrada[i + 10];
 
-            //quintoPeriodo.saida[i] --> D --> sextoPeriodo.entrada[i];
+        terceiroPeriodo.saida[0] --> D --> fim.entrada[0];
             //quintoPeriodo.saida[i + 10] --> D --> quintoPeriodo.entrada[i + 10];
 
             //sextoPeriodo.saida[i] --> D --> fim.entrada[i];            
             //sextoPeriodo.saida[i + 10] --> D --> sextoPeriodo.entrada[i + 10];
 
 
-        }
 
-//        comum.saida++ --> D --> especifica1.entrada;
-//        comum.saida++ --> D --> especifica2.entrada;
-//        especifica1.saida --> D --> fim.entrada++;
-//        especifica2.saida --> D --> fim.entrada++;
 
 }

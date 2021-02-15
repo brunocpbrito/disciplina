@@ -42,7 +42,7 @@ void Inicio::initialize() {
 
 void Inicio::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
-    send(aluno, "saida", 1);
+    send(aluno, "saida", 0);
 
 }
 
@@ -60,8 +60,6 @@ void Inicio::enviarNovaTurma() {
         Aluno *aluno = new Aluno(numero, "aluno "+std::to_string(numero), nota);
         aluno->setIngressante(true);
         //EV << "\n Enviando aluno \"" << aluno->getNumero()   << "\" como Ingressante. \n" << endl;
-        //agenda o envio do aluno num tempo de 1 segundo. A ideia é sincronizar o tempo daqui com o tempo
-        //primeiro periodo de modo a nao gerar filas.
 
         ++cont;
 
@@ -93,7 +91,7 @@ double Inicio::tempo(){
 }
 
 void Inicio::finish(){
-    EV << "Enviado "<< entradas<< " entradas com "<< qtdeAlunos-1 << " alunos cada." << endl;
+    EV << "Enviado "<< entradas<< " entradas com "<< qtdeAlunos-1 << " alunos cada totalizando "<< entradas*(qtdeAlunos-1) <<" alunos."<< endl;
 }
 
 

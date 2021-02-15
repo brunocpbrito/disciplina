@@ -1,29 +1,30 @@
 #include <string.h>
 #include <omnetpp.h>
 #include <math.h>
-#include "Aluno.h"
 #include <list>
 #include <iostream>
+#include "Aluno.h"
+#include <vector>
+using namespace std;
 
 
 using namespace omnetpp;
 
-class PrimeiroPeriodo : public cSimpleModule {
+class SegundoPeriodo : public cSimpleModule {
   private:
     int capacidadeFila;
     int capacidade;
     cQueue turma;
     cQueue filaEspera;
     cQueue filaEvadidos;
-    std::vector<Aluno *> colecao;
+    vector<Aluno *> colecao;
 
     int portaSaida = 0;
     int portaEntrada = 0;
-    bool controle;
+
     Aluno *processando;
 
     double tempoProcessamento = 1;
-
     bool encheuTurma;
     cHistogram turmaEspera;
     cHistogram mediaTurma;
@@ -45,65 +46,54 @@ class PrimeiroPeriodo : public cSimpleModule {
     };
 };
 
-Define_Module(PrimeiroPeriodo);
+Define_Module(SegundoPeriodo);
 
-void PrimeiroPeriodo::initialize() {
-    capacidadeFila = 60;
+void SegundoPeriodo::initialize() {
+    capacidadeFila = 40;
     capacidade = capacidadeFila;
     encheuTurma = false;
     processando = nullptr;
-    controle = false;
-}
-//PrimeiroPeriodo::~PrimeiroPeriodo() {
-//    if (processando) {
-//        cancelAndDelete(processando);
-//        delete processando;
-//    }
-//    //cancelAndDelete(msgFimProcesso);
-//}
 
-void PrimeiroPeriodo::handleMessage(cMessage *msg) {
+}
+
+void SegundoPeriodo::handleMessage(cMessage *msg) {
     Aluno *aluno = dynamic_cast<Aluno*>(msg);
     if (aluno->getNome() == "turma") {
-        EV << "Criando turmas de alunos do Primeiro Periodo - Ingressantes \n" << endl;
+        //EV << "\n Criando turmas de "<< capacidadeFila <<" alunos no Segundo Periodo. \n" << endl;
         encheuTurma = false;
 
-        if (turma.getLength() < capacidadeFila && !filaEspera.isEmpty()) {
-            EV << "Turma com " << turma.getLength() << " alunos, restando " << (capacidadeFila - turma.getLength())  << " vagas. Pegando alunos da fila de espera ("<<filaEspera.getLength()<<") do Primeiro Periodo, ate completar as vagas. \n"  << endl;
-            while (turma.getLength() < capacidadeFila) {
-                if (!filaEspera.isEmpty()) {
+        if(turma.getLength() < capacidadeFila && !filaEspera.isEmpty()){
+            EV << "\n Turma com " << turma.getLength() << " alunos, restando " << (capacidadeFila - turma.getLength() ) << " vagas. Pegando alunos da fila de espera ("<<filaEspera.getLength()<<") do Segundo Periodo, ate completar as vagas. \n" << endl;
+            while(turma.getLength() < capacidadeFila){
+                if(!filaEspera.isEmpty()){
 
                     Aluno *alunoFila = check_and_cast<Aluno*>(filaEspera.pop());
                     turma.insert(alunoFila);
-                } else {
-
+                }else{
                     break;
                 }
             }
 
-
         }
-        EV << "Criando turmas de "<< turma.getLength() <<" alunos - Ingressantes e fila de espera "<< filaEspera.getLength() << " \n" << endl;
-        //colocarFila(aluno);
+        EV << "\n Criando turmas no Segundo Periodo de "<< turma.getLength() <<" alunos e fila de espera "<< filaEspera.getLength() <<" \n" << endl;
         turmaEspera.collect(filaEspera.getLength());
         mediaTurma.collect(turma.getLength());
         processar();
         //delete aluno;
     } else {
-        //EV << "Ingressante - Recebeu \"" << aluno->getNumero() << "\"  status processamento: " << aluno->getProcessando() << endl;
+        //EV << "Recebeu \"" << aluno->getNumero() << "\", status processamento: " << aluno->getProcessando() << "\" do Segundo Periodo " << endl;
 
-        // criei a variavel processando para n�o trabalhar com evadido
+        // criei a variavel processando para no trabalhar com evadido
         colocarFila(aluno);
 
     }
 }
 
-
-void PrimeiroPeriodo::processar() {
+void SegundoPeriodo::processar() {
     while (!turma.isEmpty()) {
         Aluno *aluno = check_and_cast<Aluno*>(turma.pop());
         simtime_t tempoServico = exponential(tempoProcessamento);
-        //EV << "Processando \"" << aluno->getNumero() << "\" por "  << tempoServico << "s." << endl;
+        //EV << "Processando \"" << aluno->getNumero() << "\" por " << tempoServico << "s." << endl;
         aluno->setProcessando(true);
         destinoAluno(aluno);
     }
@@ -111,57 +101,47 @@ void PrimeiroPeriodo::processar() {
 
         Aluno *turma = new Aluno();
         turma->setNome("turma");
-        EV << "\n !!Enviando alunos para o Segundo Periodo.!! \n " << endl;
+        EV << "\n !!Enviando alunos para o Terceiro Periodo.!! \n " << endl;
         //envia mensagem para criar nova turma no prox periodo
         send(turma, "saida", 0);
         encheuTurma = false;
     }
 
-
 }
 
 
-void PrimeiroPeriodo::colocarFila(Aluno *aluno) {
+void SegundoPeriodo::colocarFila(Aluno *aluno) {
     //a turma so eh enchida uma vez por leva de alunos. Uma vez enchida, so sera novamente na prox leva
     //turma menor que a capacidade e nao encheu
     if (turma.getLength() < capacidadeFila && encheuTurma == false) {
         //EV << "Colocando \"" << aluno->getNumero() << "\" na turma*** (#fila: "  << turma.getLength() + 1 << ")." << endl;
-            turma.insert(aluno);
-            if (turma.getLength() == capacidadeFila ) {
-                encheuTurma = true;
-                EV << "\n Turma do Primeiro completa, iniciando semestre. \n"   << endl;
-                processar();
-//              Aluno *turma = new Aluno();
-//              turma->setNome("turma");
-//              scheduleAt(simTime(), turma);
-                encheuTurma = true;
-            }
-
-
+        turma.insert(aluno);
+        if (turma.getLength() == capacidadeFila) {
+            //EV << "\n Turma do Segundo Periodo com "<< turma.getLength() <<" de capacidade, iniciando semestre. \n"  << endl;
+            //EV << "\n Turma do Segundo Periodo completa, iniciando semestre. \n"  << endl;
+            //processar();
+            Aluno *turma = new Aluno();
+            scheduleAt(simTime(), turma);
+            encheuTurma = true;
+        }
     } else
     //turma igual a capacidade
     if (encheuTurma == false) {
-        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() << "." << endl;
+        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
         //Encheu a turma
         encheuTurma = true;
-        if(aluno->getNome() != "turma"){
-             filaEspera.insert(aluno);
-        }
-
+        filaEspera.insert(aluno);
     } else if (encheuTurma) {
-        EV << "Turma cheia, vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
-        if(aluno->getNome() != "turma"){
-            filaEspera.insert(aluno);
-        }
-
+        EV << "Turma cheia, aluno "<<aluno->getNumero()<<" vai para a fila de espera " << filaEspera.getLength() + 1 << "." << endl;
+        filaEspera.insert(aluno);
     }
-//    if(turma.getLength() == 0 && encheuTurma == true){
+//    if(turma.getLength() capacidade && encheuTurma == false){
 //       encheuTurma = false;
 //    }
 
 }
 
-Aluno* PrimeiroPeriodo::alunoPrioridade(Aluno *aluno) {
+Aluno* SegundoPeriodo::alunoPrioridade(Aluno *aluno) {
     Aluno *aluno1 = new Aluno();
     Aluno *aluno2 = new Aluno();
     Aluno *retorno = new Aluno();
@@ -191,16 +171,16 @@ Aluno* PrimeiroPeriodo::alunoPrioridade(Aluno *aluno) {
     return retorno;
 }
 
-void PrimeiroPeriodo::finish(){
-    EV << "\n ## VALORES PARA O PRIMEIRO PERIODO ##" << endl;
+void SegundoPeriodo::finish(){
+    EV << "\n ## VALORES PARA O SEGUNDO PERIODO ##" << endl;
     EV << "Capacidade da turma de "<< capacidadeFila <<" alunos" << endl;
-    EV << "Valores para a fila de espera do Primeiro Periodo" << endl;
+    EV << "Valores para a fila de espera do Segundo Periodo" << endl;
     EV << "  Fila de espera, min:    " << turmaEspera.getMin() << endl;
     EV << "  Fila de espera, max:    " << turmaEspera.getMax() << endl;
     EV << "  Fila de espera, media:   " << turmaEspera.getMean() << endl;
     EV << "  Fila de espera, desvio padrao:   " << turmaEspera.getStddev() << endl;
     turmaEspera.recordAs("Espera");
-    EV << "Valores para a turma do Primeiro Periodo" << endl;
+    EV << "Valores para a turma do Segundo Periodo" << endl;
     EV << "  Turma, min:    " << mediaTurma.getMin() << endl;
     EV << "  Turma, max:    " << mediaTurma.getMax() << endl;
     EV << "  Turma, media:   " << mediaTurma.getMean() << endl;
@@ -209,17 +189,18 @@ void PrimeiroPeriodo::finish(){
     EV << "Total de evadidos no momento: " << filaEvadidos.getLength() << endl;
 }
 
-void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
+void SegundoPeriodo::destinoAluno(Aluno *aluno) {
 
     int rnum = std::rand();
     int probabilidade = rnum % 10;
     //probabilidade do aluno se evadir
     if (probabilidade >= 1) {
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
-        if (aluno->getNota() >= 2) {
+        if (aluno->getNota() >= 3) {
 
             aluno->setProcessando(false);
-            EV << "Aprovado aluno \"" << aluno->getNumero()   << "\" será enviado para o Segundo periodo " << endl;
+            EV << "Aprovado aluno \"" << aluno->getNumero()   << "\" sendo enviado para Terceiro periodo " << endl;
+
             //colecao.push_back(aluno);
             send(aluno, "saida", 0);
 
@@ -238,3 +219,6 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
         EV << "Aluno \"" << aluno->getNumero()   << "\" considerado como evadido. Total: "<< filaEvadidos.getLength() + 1 << " " << endl;
     }
 }
+
+
+

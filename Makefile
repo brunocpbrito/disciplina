@@ -37,7 +37,7 @@ OBJS = \
     $O/perfil/Fim.o \
     $O/perfil/Inicio.o \
     $O/perfil/PrimeiroPeriodo.o \
-    $O/perfil/QuintoPeriodo.o \
+    $O/perfil/SegundoPeriodo.o \
     $O/perfil/SextoPeriodo.o \
     $O/perfil/TerceiroPeriodo.o
 
