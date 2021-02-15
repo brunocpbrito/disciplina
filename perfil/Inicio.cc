@@ -20,7 +20,7 @@ class Inicio : public cSimpleModule {
     cQueue fila;
     int count = 0;
     cHistogram racaStats;
-    int qtdeAlunos = 41;
+    int qtdeAlunos;
     int entradas = 10;
     double t = 0.0;
   protected:
@@ -34,7 +34,7 @@ class Inicio : public cSimpleModule {
 Define_Module(Inicio);
 
 void Inicio::initialize() {
-
+    qtdeAlunos = par("qtdeAlunos");
     for (int var = 0; var < entradas; ++var) {
         enviarNovaTurma();
     }

@@ -7,7 +7,7 @@ simple Inicio
 {
     parameters:
         @display("i=old/folder;i2=status/red, purple");
-        int capacidadeFila = default(10);
+        int qtdeAlunos = default(40+1);
     gates:
         //input entrada;
         output saida[1];
@@ -17,7 +17,7 @@ simple PrimeiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(10);
+        int capacidadeFila = default(60);
     gates:
         input entrada[1];
         output saida[1];
@@ -27,7 +27,7 @@ simple SegundoPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(10);
+        int capacidadeFila = default(40);
     gates:
         input entrada[1];
         output saida[1];
@@ -36,7 +36,7 @@ simple TerceiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeFila = default(2);
+        int capacidadeFila = default(40);
     gates:
         input entrada[1];
         output saida[1];
