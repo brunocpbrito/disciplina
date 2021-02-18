@@ -8,7 +8,7 @@ simple Inicio
     parameters:
         @display("i=old/folder;i2=status/red, purple");
         int quantidadeAlunos = default(40);    //quantidade de alunos numa entrada
-        int entradas = default(10);            //quantidade de entradas(periodos) de uma turma. 
+        int entradas = default(100);            //quantidade de entradas(periodos) de uma turma. 
         									   //Ex.2021.1, 2020.2, 2021.1, 2021.2
 
         //Este parametro serve apenas como artificio para controle de codigo, 
@@ -24,9 +24,9 @@ simple PrimeiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red, red");
-        int capacidadeTurma = default(60);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(10);  //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
+        int capacidadeTurma = default(100);                    //capacidade maxima da turma
+        int probReprovacaoAluno = default(0);                  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probCancelamentoDisciplina = default(0);           //porcentagem da probabilidade de um aluno cancelar a disciplina
     gates:
         input entrada[1];
         output saida[2];
@@ -36,9 +36,10 @@ simple SegundoPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red,red");
-        int capacidadeTurma = default(60);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(20);  //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
+        int capacidadeTurma = default(100);      //capacidade maxima da turma
+        int probReprovacaoAluno = default(0);  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probCancelamentoDisciplina = default(0);            //porcentagem da probabilidade de um aluno trancar.
+        int probRetornoCancelamento = default(0);           //porcentagem da probabilidade de um aluno trancado retornar.
     gates:
         input entrada[1];
         output saida[1];
@@ -47,9 +48,10 @@ simple TerceiroPeriodo
 {
     parameters:
         @display("i=old/folder;i2=status/red,red");
-        int capacidadeTurma = default(40);      //capacidade maxima da turma
-        int probReprovacaoAluno = default(10);  //porcentagem da probablidade de um aluno reprovar o periodo
-        int probEvasao = default(10);           //porcentagem da probabilidade de um aluno se evadir
+        int capacidadeTurma = default(100);      //capacidade maxima da turma
+        int probReprovacaoAluno = default(0);  //porcentagem da probablidade de um aluno reprovar o periodo
+        int probCancelamentoDisciplina = default(0);            //porcentagem da probabilidade de um aluno se evadir
+        int probRetornoCancelamento = default(0);          //porcentagem da probabilidade de um aluno trancado retornar.   
     gates:
         input entrada[1];
         output saida[1];
@@ -107,9 +109,11 @@ network Perfil
         }
         Disciplina_B: SegundoPeriodo {
             @display("i=abstract/people,#FFFF80;p=221,61;t=SEGUNDO PERIODO,,#400000;i2=-");
+            
         }
         Disciplina_C: SegundoPeriodo {
             @display("i=abstract/people,grey;p=221,251;t=SEGUNDO PERIODO,,black;i2=-");
+            
         }
         Disciplina_D: TerceiroPeriodo {
             @display("i=abstract/people,pink;p=397,150;t=TERCEIRO PERIODO,,black;i2=-");
@@ -133,9 +137,5 @@ network Perfil
         merge.saida[0] --> D --> Disciplina_D.entrada[0];
 
         Disciplina_D.saida[0] --> D --> formados.entrada[0];
-
-
-
-
 
 }

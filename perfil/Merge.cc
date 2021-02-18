@@ -29,12 +29,19 @@ void Merge::initialize() {
     count = 0;
 }
 
+/*
+ * Verifica quais alunos que chegaram podem cursar o Terceiro Periodo.
+ */
 void Merge::handleMessage(cMessage *msg) {
 
     verificarRepeticao(msg);
 
 }
 
+/*
+ * Verifica se os alunos cursaram as duas disciplinas obrigatorias para o Terceiro Periodo, as disciplinas B e C.
+ * Se foi aprovado apenas em uma, fica na lista de espera ate ser aprovado na segunda.
+ */
 void Merge::verificarRepeticao(cMessage *msg){
     Aluno *aluno = check_and_cast<Aluno*>(msg);
 
@@ -43,20 +50,27 @@ void Merge::verificarRepeticao(cMessage *msg){
     }else{
         lista.push_back(aluno);
     }
+
+    //Se chegou duas mensagens de turma, significa que as disciplinas B e C terminaram.
     if(count == 2){
-        EV << "Alunos aptos a cursar o Terceiro Perido por ter sido aprovado nas disciplinas A e B. " << endl;
+
+        EV << "Alunos aptos a cursar o Terceiro Perido por terem sido aprovados nas disciplinas B e C. " << endl;
         //verifica se ha alunos repetidos. Isso é importante para evitar alunos duplicados no envio.
         //para poder enviar um aluno, ele deve estar aprovado das duas disciplinas do Segundo Periodo
         for (int i = 0; i < lista.size(); ++i){
-            Aluno * procurado = lista[i];
 
+            Aluno * procurado = lista[i];
             for (int j = i+1; j < lista.size(); ++j) {
 
                 Aluno * encontrado = lista[j];
                 if(procurado->getNumero() == encontrado->getNumero()){
-                    EV << "Aluno "<< encontrado->getNumero()<< endl;
+                    EV << "Aluno "<< encontrado->getNumero() << endl;
                     colecao.push_back(encontrado);
+
                     lista.erase(lista.begin()+j);
+                    lista.erase(lista.begin()+i);
+                    --i;
+
                     break;
                 }
             }
@@ -69,11 +83,13 @@ void Merge::verificarRepeticao(cMessage *msg){
             EV << "Não ha alunos para enviar ao Terceiro Periodo " << endl;
         }
         count = 0;
-        lista.clear();
         colecao.clear();
     }
 }
 
+/*
+ * Envia a coleco de alunos aptos a cursar o Terceiro Periodo.
+ */
 void Merge::enviarAlunos(std::vector<Aluno *> colecao){
     for (int var = 0; var < colecao.size(); ++var) {
         Aluno * aluno = colecao[var];

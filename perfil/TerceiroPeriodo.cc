@@ -14,11 +14,13 @@ class TerceiroPeriodo : public cSimpleModule {
   private:
     int capacidadeFila;
     int probReprovacao;
-    int probEvasao;
+    int probCancelamentoDisciplina;
+    int probRetorno;
     bool pegarEspera;
+    bool retornoEvadido;
     cQueue turma;
     cQueue filaEspera;
-    cQueue filaEvadidos;
+    cQueue filaCancelados;
 
     double tempoProcessamento = 1;
 
@@ -32,9 +34,7 @@ class TerceiroPeriodo : public cSimpleModule {
     virtual void handleMessage(cMessage *msg) override;
 
   public:
-    //virtual ~PrimeiroPeriodo() override;
     virtual void finish() override;
-    virtual Aluno * alunoPrioridade(Aluno * aluno);
     virtual void destinoAluno(Aluno * aluno);
     double notaAleatoria(){
        int rnum = std::rand();
@@ -47,8 +47,11 @@ Define_Module(TerceiroPeriodo);
 void TerceiroPeriodo::initialize() {
     capacidadeFila = par("capacidadeTurma");;
     probReprovacao = par("probReprovacaoAluno");
-    probEvasao = par("probEvasao");
+    probCancelamentoDisciplina = par("probCancelamentoDisciplina");
+    probRetorno = par("probRetornoCancelamento");
+
     pegarEspera = true;
+    retornoEvadido = false;
 
 }
 
@@ -60,12 +63,31 @@ void TerceiroPeriodo::handleMessage(cMessage *msg) {
 
         if (pegarEspera) {
             if (turma.getLength() < capacidadeFila && !filaEspera.isEmpty()) {
-                EV << "\n Turma com " << turma.getLength()  << " alunos, restando "   << (capacidadeFila - turma.getLength())  << " vagas. Pegando alunos da fila de espera ("   << filaEspera.getLength()   << ") do Terceiro Periodo, ate completar as vagas. \n" << endl;
+                EV << "\n Turma com " << turma.getLength()  << " alunos, restando "   << (capacidadeFila - turma.getLength())  << " vagas. Pegando alunos da fila de espera ("   << filaEspera.getLength()   << ") do Terceiro Periodo, ate completar as vagas. " << endl;
                 while (turma.getLength() < capacidadeFila) {
                     if (!filaEspera.isEmpty()) {
                         Aluno *alunoFila = check_and_cast<Aluno*>( filaEspera.pop());
                         turma.insert(alunoFila);
                     } else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        //Ha a possibilidade de um aluno evadido voltar.
+        //Caso ainda haja vagas e a fila de espera esteja vazia, ha a possibilidade do aluno evadido entrar na turma
+        if (retornoEvadido) {
+            if (turma.getLength() < capacidadeFila && filaEspera.isEmpty()) {
+                for (int var = 0; var < filaCancelados.getLength(); ++var) {
+                    int rnum = std::rand();
+                    int retorno = rnum % 100;
+                    if (retorno <= probRetorno) {
+                        Aluno *alunoFila = check_and_cast<Aluno*>(filaCancelados.pop());
+                        EV << "\n Turma com " << turma.getLength() << " alunos, restando " << (capacidadeFila - turma.getLength()) << " vagas. Sendo ocupada pelo retorno do aluno trancado " << alunoFila->getNumero() << endl;
+                        turma.insert(alunoFila);
+                    }
+                    if (turma.getLength() == capacidadeFila) {
                         break;
                     }
                 }
@@ -124,36 +146,6 @@ void TerceiroPeriodo::colocarFila(Aluno *aluno) {
 
 }
 
-Aluno* TerceiroPeriodo::alunoPrioridade(Aluno *aluno) {
-    Aluno *aluno1 = new Aluno();
-    Aluno *aluno2 = new Aluno();
-    Aluno *retorno = new Aluno();
-
-    //se houver fila de espera e turma
-    //entao compara qual sera o prox a processar baseado na quantidade de matriculas
-    //precisa ser ajustado para pegar a devida preferencia
-    if (filaEspera.getLength() > 0 && turma.getLength() > 0) {
-
-        aluno1 = check_and_cast<Aluno*>(turma.front());
-        aluno2 = check_and_cast<Aluno*>(filaEspera.front());
-        if (aluno1->getQtdMatriculas() <= aluno2->getQtdMatriculas()) {
-            EV << "Mantem a prioridade do aluno." << endl;
-            retorno = check_and_cast<Aluno*>(turma.pop());
-        } else {
-            EV << "troca de alunos pela prioridade da fila de espera." << endl;
-            retorno = check_and_cast<Aluno*>(filaEspera.pop());
-        }
-    } else if (turma.getLength() <= 0) {
-        EV << "Colocando \"" << aluno->getNumero() << "\" na turma e processando (#fila: " << turma.getLength() + 1 << ")." << endl;
-        //turma.insert(aluno);
-        retorno = aluno;
-    } else {
-        retorno = check_and_cast<Aluno*>(turma.pop());
-    }
-
-    return retorno;
-}
-
 void TerceiroPeriodo::finish(){
     EV << "\n ## VALORES PARA O TERCEIRO PERIODO ##" << endl;
     EV << "Capacidade da turma de "<< capacidadeFila <<" alunos" << endl;
@@ -169,7 +161,7 @@ void TerceiroPeriodo::finish(){
     EV << "  Turma, media:   " << mediaTurma.getMean() << endl;
     EV << "  Turma, desvio padrao:   " << mediaTurma.getStddev() << endl;
     EV << "Total de reprovados no momento: " << filaEspera.getLength() << endl;
-    EV << "Total de evadidos: " << filaEvadidos.getLength() << endl;
+    EV << "Total de alunos que cancelaram a disciplina: " << filaCancelados.getLength() << endl;
 }
 
 void TerceiroPeriodo::destinoAluno(Aluno *aluno) {
@@ -177,7 +169,7 @@ void TerceiroPeriodo::destinoAluno(Aluno *aluno) {
     int rnum = std::rand();
     int probabilidade = rnum % 100;
     //probabilidade do aluno se evadir
-    if (probabilidade >= probEvasao) {
+    if (probabilidade >= probCancelamentoDisciplina) {
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
         if (aluno->getNota() >= probReprovacao) {
 
@@ -198,8 +190,8 @@ void TerceiroPeriodo::destinoAluno(Aluno *aluno) {
         }
 
     } else {
-        filaEvadidos.insert(aluno);
-        EV << "Aluno \"" << aluno->getNumero()   << "\" considerado como evadido. Total: "<< filaEvadidos.getLength() + 1 << " " << endl;
+        filaCancelados.insert(aluno);
+        EV << "Aluno \"" << aluno->getNumero()   << "\" cancelou a disciplina. Total de cancelamentos: "<< filaCancelados.getLength() + 1 << " " << endl;
     }
 }
 

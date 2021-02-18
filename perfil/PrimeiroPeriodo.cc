@@ -14,11 +14,13 @@ class PrimeiroPeriodo : public cSimpleModule {
   private:
     int capacidadeFila;
     int probReprovacao;
-    int probEvasao;
+    int probCancelamentoDisciplina;
     bool pegarEspera;
     cQueue turma;
     cQueue filaEspera;
-    cQueue filaEvadidos;
+
+    //alunos que cancelaram a disciplina ao iniciar
+    cQueue filaCancelados;
 
     double tempoProcessamento = 1;
 
@@ -46,7 +48,8 @@ Define_Module(PrimeiroPeriodo);
 void PrimeiroPeriodo::initialize() {
     capacidadeFila = par("capacidadeTurma");
     probReprovacao = par("probReprovacaoAluno");
-    probEvasao = par("probEvasao");
+    probCancelamentoDisciplina = par("probCancelamentoDisciplina");
+
     pegarEspera = true;
 }
 
@@ -153,7 +156,7 @@ void PrimeiroPeriodo::finish(){
     EV << "  Turma, media:   " << mediaTurma.getMean() << endl;
     EV << "  Turma, desvio padrao:   " << mediaTurma.getStddev() << endl;
     EV << "Total de reprovados no momento: " << filaEspera.getLength() << endl;
-    EV << "Total de evadidos: " << filaEvadidos.getLength() << endl;
+    EV << "Total de alunos que cancelaram a disciplina: " << filaCancelados.getLength() << endl;
 }
 
 /*
@@ -166,7 +169,7 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
     int rnum = std::rand();
     int valor = rnum % 100;
     //probabilidade do aluno se evadir
-    if (valor >= probEvasao) {
+    if (valor >= probCancelamentoDisciplina) {
         // se nota maior que 70, entra na porta saida que leva para o proximo periodo
         if (aluno->getNota() >= probReprovacao) {
 
@@ -184,7 +187,7 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
         }
         // senao, entra na porta saida que leva para o periodo atual
         else {
-            EV << "Reprovado o aluno \"" << aluno->getNumero() << "\" para o mesmo periodo na fila de espera. Total espera: " << filaEspera.getLength() + 1 << " " << endl;
+            EV << "Reprovado o aluno \"" << aluno->getNumero() << "\" para o mesmo periodo na fila de espera. Total espera: " << filaEspera.getLength() << " " << endl;
             //o aluno entra na fila de espera para a pro turma
             aluno->setQtdMatriculas(aluno->getQtdMatriculas() + 1);
             filaEspera.insert(aluno);
@@ -192,8 +195,8 @@ void PrimeiroPeriodo::destinoAluno(Aluno *aluno) {
         }
 
     } else {
-        filaEvadidos.insert(aluno);
-        EV << "Aluno \"" << aluno->getNumero()   << "\" considerado como evadido. Total: "<< filaEvadidos.getLength() + 1 << " " << endl;
+        filaCancelados.insert(aluno);
+        EV << "Aluno \"" << aluno->getNumero()   << "\" cancelou a disciplina. Total: "<< filaCancelados.getLength() << " " << endl;
     }
 }
 
